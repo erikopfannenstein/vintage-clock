@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Grandfather Clock Display</title>
+  <style>
+    :root {
+      --hand-color: #1a120b;
+      --second-color: #8b0000;
+      --clock-size: min(94vw, 94vh);
+      --hour-width: 1.5%;
+      --minute-width: 1.05%;
+      --second-width: 0.38%;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      touch-action: manipulation;
+    }
+
+    #stage {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: #000;
+    }
+
+    #clock {
+      position: relative;
+      width: var(--clock-size);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 48%, #f5edcf 0 55%, #d6c292 72%, #7c5b2d 100%);
+      box-shadow: inset 0 0 0 1.5vmin rgba(64, 40, 12, .9);
+    }
+
+    #dialImage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    #fallbackDial {
+      position: absolute;
+      inset: 0;
+    }
+
+    .numeral {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform-origin: 0 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 700;
+      font-size: calc(var(--clock-size) * 0.075);
+      color: #2c1c0b;
+      text-shadow: 0 1px 0 rgba(255,255,255,.5);
+    }
+
+    .tick {
+      position: absolute;
+      left: 49.7%;
+      top: 3%;
+      width: 0.6%;
+      height: 5%;
+      background: #2b1b0a;
+      transform-origin: 50% 940%;
+      opacity: .85;
+    }
+
+    .tick.major {
+      width: 0.9%;
+      height: 8%;
+      top: 2%;
+      transform-origin: 50% 600%;
+    }
+
+    .hand {
+      position: absolute;
+      left: 50%;
+      bottom: 50%;
+      transform-origin: 50% 100%;
+      border-radius: 999px;
+      z-index: 5;
+      filter: drop-shadow(0 0.15vmin 0.12vmin rgba(0,0,0,.55));
+    }
+
+    #hour {
+      width: var(--hour-width);
+      height: 25%;
+      margin-left: calc(var(--hour-width) / -2);
+      background: var(--hand-color);
+    }
+
+    #minute {
+      width: var(--minute-width);
+      height: 36%;
+      margin-left: calc(var(--minute-width) / -2);
+      background: var(--hand-color);
+    }
+
+    #second {
+      width: var(--second-width);
+      height: 40%;
+      margin-left: calc(var(--second-width) / -2);
+      background: var(--second-color);
+      z-index: 6;
+    }
+
+    #pin {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 4.2%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, #d2b16d 0 30%, #65451e 65%, #1e1307 100%);
+      z-index: 7;
+      box-shadow: 0 0.2vmin 0.2vmin rgba(0,0,0,.45);
+    }
+
+    #controls {
+      position: fixed;
+      left: 50%;
+      bottom: calc(12px + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 10px;
+      width: min(94vw, 760px);
+      background: rgba(0,0,0,.68);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 14px;
+      backdrop-filter: blur(10px);
+      z-index: 20;
+      transition: opacity .25s ease;
+    }
+
+    button, label {
+      appearance: none;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 13px;
+      font-size: 15px;
+      background: #f2f2f2;
+      color: #111;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    input[type="file"] { display: none; }
+
+    #hint {
+      color: #fff;
+      font-size: 12px;
+      width: 100%;
+      text-align: center;
+      opacity: .8;
+      line-height: 1.35;
+    }
+
+    body.hide-controls #controls {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    body.no-second #second {
+      display: none;
+    }
+
+    @media (orientation: portrait) {
+      :root { --clock-size: min(96vw, 76vh); }
+    }
+  </style>
+</head>
+<body>
+  <main id="stage">
+    <div id="clock" aria-label="analog clock">
+      <div id="fallbackDial"></div>
+      <img id="dialImage" alt="Clock face" />
+      <div class="hand" id="hour"></div>
+      <div class="hand" id="minute"></div>
+      <div class="hand" id="second"></div>
+      <div id="pin"></div>
+    </div>
+  </main>
+
+  <section id="controls">
+    <label for="imagePicker">Choose Clock Face</label>
+    <input id="imagePicker" type="file" accept="image/*" />
+    <button id="toggleSecond">Hide Second Hand</button>
+    <button id="enableSound">Enable Chimes</button>
+    <button id="testQuarter">Test Quarter Chime</button>
+    <button id="testHour">Test Hour Strike</button>
+    <button id="fullscreen">Fullscreen</button>
+    <button id="hide">Hide Controls</button>
+    <button id="reset">Reset</button>
+    <label style="display:flex;align-items:center;gap:6px">
+      Quiet Hours
+      <select id="quietStart" style="font-size:15px;border-radius:8px;padding:6px">
+        <option value="20">8 PM</option>
+        <option value="21">9 PM</option>
+        <option value="22" selected>10 PM</option>
+        <option value="23">11 PM</option>
+        <option value="0">12 AM</option>
+      </select>
+      〜
+      <select id="quietEnd" style="font-size:15px;border-radius:8px;padding:6px">
+        <option value="6">6 AM</option>
+        <option value="7" selected>7 AM</option>
+        <option value="8">8 AM</option>
+        <option value="9">9 AM</option>
+      </select>
+    </label>
+    <div id="hint">
+      文字盤を正面から撮影し、中央が画面の中央に来るように切り抜くと自然に見えます。
+      画面を1回タップすると操作パネルが戻ります。
+    </div>
+  </section>
+
+  <script>
+    const fallbackDial = document.getElementById("fallbackDial");
+    const hourHand = document.getElementById("hour");
+    const minuteHand = document.getElementById("minute");
+    const secondHand = document.getElementById("second");
+    const dialImage = document.getElementById("dialImage");
+    const imagePicker = document.getElementById("imagePicker");
+    const toggleSecond = document.getElementById("toggleSecond");
+
+    function buildDial() {
+      for (let i = 0; i < 60; i++) {
+        const tick = document.createElement("div");
+        tick.className = "tick" + (i % 5 === 0 ? " major" : "");
+        tick.style.transform = `rotate(${i * 6}deg)`;
+        fallbackDial.appendChild(tick);
+      }
+
+      const romans = ["XII","I","II","III","IV","V","VI","VII","VIII","IX","X","XI"];
+      romans.forEach((text, i) => {
+        const angle = i * 30;
+        const radius = 38;
+        const rad = angle * Math.PI / 180;
+        const x = 50 + Math.sin(rad) * radius;
+        const y = 50 - Math.cos(rad) * radius;
+
+        const n = document.createElement("div");
+        n.className = "numeral";
+        n.textContent = text;
+        n.style.left = `${x}%`;
+        n.style.top = `${y}%`;
+        n.style.transform = "translate(-50%, -50%)";
+        fallbackDial.appendChild(n);
+      });
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const ms = now.getMilliseconds();
+      const seconds = now.getSeconds() + ms / 1000;
+      const minutes = now.getMinutes() + seconds / 60;
+      const hours = (now.getHours() % 12) + minutes / 60;
+
+      hourHand.style.transform = `rotate(${hours * 30}deg)`;
+      minuteHand.style.transform = `rotate(${minutes * 6}deg)`;
+      secondHand.style.transform = `rotate(${seconds * 6}deg)`;
+
+      requestAnimationFrame(updateClock);
+    }
+
+    imagePicker.addEventListener("change", event => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      const objectUrl = URL.createObjectURL(file);
+      dialImage.onload = () => {
+        dialImage.style.display = "block";
+        fallbackDial.style.display = "none";
+      };
+      dialImage.onerror = () => {
+        alert("Unable to load the image. Please choose a JPEG or PNG file.");
+      };
+      dialImage.src = objectUrl;
+
+      // 保存できる端末では次回も表示。大きな写真では保存容量を超えることがあるため、
+      // 保存に失敗しても今回の表示には影響しないようにしています。
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          localStorage.setItem("clockDialImage", e.target.result);
+        } catch (err) {
+          console.log("Image displayed, but could not be saved for the next session.");
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    toggleSecond.addEventListener("click", () => {
+      document.body.classList.toggle("no-second");
+      const hidden = document.body.classList.contains("no-second");
+      toggleSecond.textContent = hidden ? "Show Second Hand" : "Hide Second Hand";
+      localStorage.setItem("noSecond", hidden ? "1" : "0");
+    });
+
+    document.getElementById("fullscreen").addEventListener("click", async () => {
+      try {
+        if (document.documentElement.requestFullscreen) {
+          if (!document.fullscreenElement) {
+            await document.documentElement.requestFullscreen();
+          } else {
+            await document.exitFullscreen();
+          }
+        } else {
+          alert("iPadのSafariでは、このボタンでFullscreenにならない場合があります。共有ボタンから「ホーム画面に追加」すると、よりFullscreenに近く表示できます。");
+        }
+      } catch (e) {
+        alert("Fullscreen表示にできませんでした。Safariの共有ボタンから「ホーム画面に追加」をお試しください。");
+      }
+    });
+
+    document.getElementById("hide").addEventListener("click", () => {
+      document.body.classList.add("hide-controls");
+    });
+
+    document.getElementById("reset").addEventListener("click", () => {
+      localStorage.removeItem("clockDialImage");
+      localStorage.removeItem("noSecond");
+      dialImage.src = "";
+      dialImage.style.display = "none";
+      fallbackDial.style.display = "block";
+      document.body.classList.remove("no-second");
+      toggleSecond.textContent = "Hide Second Hand";
+    });
+
+    document.getElementById("stage").addEventListener("click", () => {
+      document.body.classList.remove("hide-controls");
+    });
+
+    let saved = null;
+    try {
+      saved = localStorage.getItem("clockDialImage");
+    } catch (err) {}
+    if (saved) {
+      dialImage.onload = () => {
+        dialImage.style.display = "block";
+        fallbackDial.style.display = "none";
+      };
+      dialImage.src = saved;
+    }
+
+    if (localStorage.getItem("noSecond") === "1") {
+      document.body.classList.add("no-second");
+      toggleSecond.textContent = "Show Second Hand";
+    }
+
+
+    // ---- Westminster-style chime (Web Audio API, no external audio files) ----
+    let audioCtx = null;
+    let soundEnabled = false;
+    let lastChimeKey = "";
+
+    const enableSoundBtn = document.getElementById("enableSound");
+    const quietStart = document.getElementById("quietStart");
+    const quietEnd = document.getElementById("quietEnd");
+
+    function loadChimeSettings() {
+      quietStart.value = localStorage.getItem("quietStart") || "22";
+      quietEnd.value = localStorage.getItem("quietEnd") || "7";
+    }
+
+    quietStart.addEventListener("change", () => localStorage.setItem("quietStart", quietStart.value));
+    quietEnd.addEventListener("change", () => localStorage.setItem("quietEnd", quietEnd.value));
+
+    async function ensureAudio() {
+      if (!audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new Ctx();
+      }
+      if (audioCtx.state === "suspended") {
+        await audioCtx.resume();
+      }
+      soundEnabled = true;
+      enableSoundBtn.textContent = "Chimes Enabled ✓";
+    }
+
+    enableSoundBtn.addEventListener("click", async () => {
+      try {
+        await ensureAudio();
+        playBellTone(659.25, 0, 0.5, 0.16);
+      } catch (e) {
+        alert("Unable to enable audio. Please check Silent Mode and volume settings.");
+      }
+    });
+
+    function isQuietTime(date = new Date()) {
+      const start = Number(quietStart.value);
+      const end = Number(quietEnd.value);
+      const h = date.getHours();
+      if (start === end) return false;
+      return start < end ? (h >= start && h < end) : (h >= start || h < end);
+    }
+
+    function playBellTone(freq, delay = 0, duration = 1.2, volume = 0.18) {
+      if (!audioCtx || !soundEnabled) return;
+      const now = audioCtx.currentTime + delay;
+
+      const master = audioCtx.createGain();
+      master.gain.setValueAtTime(0.0001, now);
+      master.gain.exponentialRampToValueAtTime(volume, now + 0.015);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+      master.connect(audioCtx.destination);
+
+      // layered partials give a more bell-like tone
+      [
+        [1.00, 1.00],
+        [2.01, 0.28],
+        [2.98, 0.16],
+        [4.10, 0.07]
+      ].forEach(([ratio, level]) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq * ratio, now);
+        gain.gain.setValueAtTime(level, now);
+        osc.connect(gain);
+        gain.connect(master);
+        osc.start(now);
+        osc.stop(now + duration + 0.05);
+      });
+    }
+
+    const notes = {
+      E4: 329.63,
+      G4: 392.00,
+      A4: 440.00,
+      B4: 493.88
+    };
+
+    // Simplified Westminster phrases
+    const phrases = [
+      ["G4","E4","A4","B4"],
+      ["E4","G4","A4","B4"],
+      ["E4","A4","G4","B4"],
+      ["B4","A4","G4","E4"]
+    ];
+
+    function playPhrase(index, offset = 0) {
+      const p = phrases[index % phrases.length];
+      p.forEach((note, i) => {
+        playBellTone(notes[note], offset + i * 0.58, 1.35, 0.14);
+      });
+      return offset + p.length * 0.58 + 0.28;
+    }
+
+    function playQuarterChime(quarter) {
+      if (!soundEnabled || isQuietTime()) return;
+      let offset = 0;
+      for (let i = 0; i < quarter; i++) {
+        offset = playPhrase(i, offset);
+      }
+    }
+
+    function playHourStrike(hour12, startOffset = 0) {
+      if (!soundEnabled || isQuietTime()) return;
+      for (let i = 0; i < hour12; i++) {
+        playBellTone(261.63, startOffset + i * 1.15, 1.65, 0.22);
+      }
+    }
+
+    function playHourlySequence(date = new Date()) {
+      if (!soundEnabled || isQuietTime(date)) return;
+      let offset = 0;
+      for (let i = 0; i < 4; i++) {
+        offset = playPhrase(i, offset);
+      }
+      const h = date.getHours() % 12 || 12;
+      playHourStrike(h, offset + 0.5);
+    }
+
+    document.getElementById("testQuarter").addEventListener("click", async () => {
+      await ensureAudio();
+      playQuarterChime(1);
+    });
+
+    document.getElementById("testHour").addEventListener("click", async () => {
+      await ensureAudio();
+      const d = new Date();
+      playHourlySequence(d);
+    });
+
+    function checkScheduledChime(now) {
+      if (!soundEnabled || isQuietTime(now)) return;
+
+      const minute = now.getMinutes();
+      const second = now.getSeconds();
+      if (second > 1) return;
+
+      let quarter = 0;
+      if (minute === 15) quarter = 1;
+      else if (minute === 30) quarter = 2;
+      else if (minute === 45) quarter = 3;
+      else if (minute === 0) quarter = 4;
+      else return;
+
+      const key = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${now.getHours()}-${minute}`;
+      if (key === lastChimeKey) return;
+      lastChimeKey = key;
+
+      if (quarter === 4) {
+        playHourlySequence(now);
+      } else {
+        playQuarterChime(quarter);
+      }
+    }
+
+    loadChimeSettings();
+    buildDial();
+    updateClock();
+    setInterval(() => checkScheduledChime(new Date()), 500);
+  </script>
+</body>
+</html>
