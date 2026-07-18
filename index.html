@@ -285,7 +285,7 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 5%;
+      width: calc(5% * var(--center-cap-scale,1));
       aspect-ratio: 1;
       transform: translate(-50%, -50%);
       z-index: 12;
@@ -675,6 +675,11 @@
         </div>
       </div>
 
+        <div style="margin-top:10px;">
+          <label for="centerCapSize">Center Cap Size <span id="centerCapSizeValue">100%</span></label>
+          <input id="centerCapSize" type="range" min="50" max="200" value="100" />
+        </div>
+
       <button id="resetHandsButton" type="button" style="margin-top:8px;">Reset Hand Style</button>
     </section>
 
@@ -884,6 +889,8 @@
     const secondHandToggle = document.getElementById("secondHandToggle");
     const handColor = document.getElementById("handColor");
     const centerColor = document.getElementById("centerColor");
+const centerCapSize=document.getElementById("centerCapSize");
+const centerCapSizeValue=document.getElementById("centerCapSizeValue");
     const secondColor = document.getElementById("secondColor");
     const resetHandsButton = document.getElementById("resetHandsButton");
 
@@ -1211,6 +1218,12 @@
     centerColor.addEventListener("input", () => {
       document.documentElement.style.setProperty("--center-color", centerColor.value);
     });
+centerCapSize.addEventListener("input",()=>{
+  centerCapSizeValue.textContent=centerCapSize.value+"%";
+  document.documentElement.style.setProperty("--center-cap-scale",(centerCapSize.value/100).toString());
+  localStorage.setItem("centerCapSize",centerCapSize.value);
+});
+
 
     secondColor.addEventListener("input", () => {
       document.documentElement.style.setProperty("--second-color", secondColor.value);
@@ -1231,7 +1244,11 @@
       document.documentElement.style.setProperty("--center-color", centerColor.value);
       document.documentElement.style.setProperty("--second-color", secondColor.value);
       renderHands();
-    });
+    
+  centerCapSize.value="100";
+  centerCapSizeValue.textContent="100%";
+  document.documentElement.style.setProperty("--center-cap-scale","1");
+  localStorage.removeItem("centerCapSize");});
 
     brandToggle.addEventListener("change", () => {
       brand.style.display = brandToggle.checked ? "block" : "none";
