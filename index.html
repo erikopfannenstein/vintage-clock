@@ -1367,7 +1367,9 @@
 
         try {
           await audio.play();
-          fadeAndStopAudio(audio, tailSeconds);
+          if (tailSeconds !== null) {
+            fadeAndStopAudio(audio, tailSeconds);
+          }
         } catch (error) {
           cleanUp();
           console.error(error);
@@ -1377,9 +1379,40 @@
       chimeTimers.add(timer);
     }
 
+    function isWestminsterSelected() {
+      return chimeSoundSelect.value.toLowerCase().includes("westminster");
+    }
+
+    function updateChimeControlAvailability() {
+      const westminsterSelected = isWestminsterSelected();
+      repeatCountSelect.disabled = westminsterSelected;
+      strikeSpacingSlider.disabled = westminsterSelected;
+      soundTailSlider.disabled = westminsterSelected;
+
+      repeatCountSelect.title = westminsterSelected
+        ? "Westminster recordings already contain the complete chime sequence."
+        : "";
+      strikeSpacingSlider.title = westminsterSelected
+        ? "Westminster plays once from beginning to end."
+        : "";
+      soundTailSlider.title = westminsterSelected
+        ? "Westminster uses the full recorded sound without an early fade-out."
+        : "";
+    }
+
     function playSelectedChime(hour = new Date().getHours()) {
       stopAllChimes();
       const source = getSelectedChimeSource();
+      const soundName = chimeSoundSelect.options[chimeSoundSelect.selectedIndex].text;
+
+      // Westminster files already contain the complete musical sequence.
+      // Play the selected recording once and let it finish naturally.
+      if (isWestminsterSelected()) {
+        playOneChime(source, 0, null);
+        audioStatus.textContent = `Playing ${soundName} once.`;
+        return;
+      }
+
       const repeatCount = getRepeatCount(hour);
       const spacingMs = Number(strikeSpacingSlider.value) * 1000;
       const tailSeconds = Number(soundTailSlider.value);
@@ -1388,7 +1421,6 @@
         playOneChime(source, i * spacingMs, tailSeconds);
       }
 
-      const soundName = chimeSoundSelect.options[chimeSoundSelect.selectedIndex].text;
       audioStatus.textContent = `Playing ${soundName} × ${repeatCount}.`;
     }
 
@@ -1427,7 +1459,13 @@
       saveChimeSettings();
     });
 
-    [chimeSoundSelect, repeatCountSelect, quietToggle, quietStart, quietEnd].forEach(control => {
+    chimeSoundSelect.addEventListener("change", () => {
+      stopAllChimes();
+      updateChimeControlAvailability();
+      saveChimeSettings();
+    });
+
+    [repeatCountSelect, quietToggle, quietStart, quietEnd].forEach(control => {
       control.addEventListener("change", saveChimeSettings);
     });
 
@@ -1493,6 +1531,7 @@
 
     loadChimeSettings();
     updateChimeLabels();
+    updateChimeControlAvailability();
     audioStatus.textContent = chimeToggle.checked ? "Hourly chime is enabled." : "Sound is off.";
 
     window.addEventListener("beforeunload", () => {
