@@ -4,39 +4,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#15110d" />
-  <title>Vintage Clock</title>
+  <title>Vintage Clock Workshop</title>
   <style>
     :root {
-      --bg: #15110d;
-      --panel: rgba(26, 20, 15, 0.94);
-      --panel-border: rgba(255, 255, 255, 0.12);
-      --text: #f3eadf;
+      --panel: rgba(25, 19, 14, 0.97);
+      --panel-border: rgba(255,255,255,0.12);
+      --text: #f4ebdf;
       --muted: #c8b9a8;
       --accent: #c8a96b;
       --button: #30261d;
       --button-hover: #443629;
-      --danger: #8d4038;
       --shadow: 0 20px 60px rgba(0,0,0,0.45);
+      --hand-color: #171411;
+      --hand-highlight: #4f4337;
+      --center-color: #b98a42;
+      --second-color: #8d211d;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html, body {
       margin: 0;
       width: 100%;
       height: 100%;
-      background:
-        radial-gradient(circle at center, #2a2118 0%, #18120e 48%, #0d0a08 100%);
       color: var(--text);
       font-family: Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(circle at center, #2a2118 0%, #18120e 48%, #0d0a08 100%);
       overflow: hidden;
     }
 
     body {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 330px;
+      grid-template-columns: minmax(0, 1fr) 380px;
     }
 
     .clock-stage {
@@ -47,6 +47,7 @@
       justify-content: center;
       padding: 24px;
       overflow: hidden;
+      user-select: none;
     }
 
     .clock-shell {
@@ -75,28 +76,24 @@
       background:
         radial-gradient(circle, #f1e2bd 0%, #e1c991 63%, #b49357 100%);
       box-shadow:
-        inset 0 0 20px rgba(74, 42, 15, 0.55),
+        inset 0 0 20px rgba(74,42,15,0.55),
         0 0 0 4px #2b1c10;
+      touch-action: none;
     }
 
-    .dial-image,
-    .default-dial {
+    .default-dial,
+    .dial-image {
       position: absolute;
-      inset: 0;
+      left: 50%;
+      top: 50%;
       width: 100%;
       height: 100%;
       border-radius: 50%;
     }
 
-    .dial-image {
-      display: none;
-      object-fit: contain;
-      background: #000;
-      z-index: 2;
-    }
-
     .default-dial {
       z-index: 1;
+      transform: translate(-50%, -50%);
     }
 
     .default-dial::before {
@@ -104,8 +101,18 @@
       position: absolute;
       inset: 4%;
       border-radius: 50%;
-      border: 2px solid rgba(69, 42, 18, 0.75);
+      border: 2px solid rgba(69,42,18,0.75);
       box-shadow: inset 0 0 0 4px rgba(255,255,255,0.12);
+    }
+
+    .dial-image {
+      z-index: 2;
+      display: none;
+      object-fit: contain;
+      background: transparent;
+      transform-origin: center;
+      pointer-events: none;
+      will-change: transform;
     }
 
     .numeral {
@@ -135,7 +142,7 @@
       top: 50%;
       width: 0.35%;
       height: 4.5%;
-      background: rgba(38, 23, 13, 0.86);
+      background: rgba(38,23,13,0.86);
       transform-origin: 50% 0;
       transform:
         rotate(calc(var(--i) * 6deg))
@@ -156,70 +163,130 @@
       top: 30%;
       left: 50%;
       transform: translateX(-50%);
-      color: rgba(45, 28, 16, 0.82);
-      font-size: clamp(12px, 1.8vmin, 24px);
+      z-index: 3;
+      color: rgba(45,28,16,0.82);
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      z-index: 3;
+      font-size: clamp(12px, 1.8vmin, 24px);
       white-space: nowrap;
+      pointer-events: none;
     }
 
-    .hand {
+    .hands-layer {
       position: absolute;
-      left: 50%;
-      bottom: 50%;
-      transform-origin: 50% 100%;
-      border-radius: 999px;
-      z-index: 5;
+      inset: 0;
+      z-index: 8;
+      pointer-events: none;
       filter: drop-shadow(0 3px 2px rgba(0,0,0,0.45));
     }
 
-    .hour-hand {
-      width: 2.2%;
-      height: 25%;
-      margin-left: -1.1%;
-      background: linear-gradient(to right, #111 0%, #3d2b1b 50%, #111 100%);
+    .rotating-hand {
+      position: absolute;
+      inset: 0;
+      transform-origin: 50% 50%;
+      pointer-events: none;
     }
 
-    .minute-hand {
-      width: 1.5%;
-      height: 34%;
-      margin-left: -0.75%;
-      background: linear-gradient(to right, #111 0%, #4f3822 50%, #111 100%);
+    .rotating-hand svg {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 18%;
+      height: 50%;
+      overflow: visible;
+      transform: translate(-50%, -100%);
+    }
+
+    .hour-hand svg {
+      width: 18%;
+      height: 33%;
+    }
+
+    .minute-hand svg {
+      width: 16%;
+      height: 44%;
     }
 
     .second-hand {
-      width: 0.55%;
-      height: 38%;
-      margin-left: -0.275%;
-      background: #8d211d;
-      z-index: 6;
+      z-index: 10;
     }
 
-    .second-hand::after {
-      content: "";
-      position: absolute;
-      width: 180%;
-      height: 18%;
-      left: -40%;
-      top: 100%;
-      background: #8d211d;
-      border-radius: 999px;
+    .second-hand svg {
+      width: 7%;
+      height: 48%;
+    }
+
+    .hand-fill {
+      fill: var(--hand-color);
+      stroke: var(--hand-highlight);
+      stroke-width: 1.2;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .hand-cutout {
+      fill: none;
+      stroke: var(--hand-highlight);
+      stroke-width: 2;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .second-fill {
+      fill: var(--second-color);
+      stroke: rgba(50,0,0,0.4);
+      stroke-width: 0.8;
+      vector-effect: non-scaling-stroke;
     }
 
     .center-cap {
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 4.5%;
+      width: 5%;
       aspect-ratio: 1;
       transform: translate(-50%, -50%);
+      z-index: 12;
       border-radius: 50%;
       background:
-        radial-gradient(circle at 35% 35%, #e7c27b 0%, #8b612d 40%, #2f1b0c 100%);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.55);
-      z-index: 8;
+        radial-gradient(circle at 35% 35%, #f0d69a 0%, var(--center-color) 42%, #33200d 100%);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+      pointer-events: none;
     }
+
+    .crosshair {
+      position: absolute;
+      inset: 0;
+      display: none;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .crosshair::before,
+    .crosshair::after {
+      content: "";
+      position: absolute;
+      background: rgba(255,70,70,0.92);
+      box-shadow: 0 0 5px rgba(0,0,0,0.8);
+    }
+
+    .crosshair::before {
+      left: 50%;
+      top: 34%;
+      width: 2px;
+      height: 32%;
+      transform: translateX(-50%);
+    }
+
+    .crosshair::after {
+      top: 50%;
+      left: 34%;
+      height: 2px;
+      width: 32%;
+      transform: translateY(-50%);
+    }
+
+    .clock-face.adjusting { cursor: grab; }
+    .clock-face.adjusting:active { cursor: grabbing; }
+    .clock-face.adjusting .crosshair { display: block; }
 
     .panel {
       height: 100%;
@@ -233,10 +300,9 @@
     .panel h1 {
       margin: 0 0 6px;
       font-size: 28px;
-      letter-spacing: 0.02em;
     }
 
-    .panel .subtitle {
+    .subtitle {
       margin: 0 0 22px;
       color: var(--muted);
       line-height: 1.45;
@@ -249,12 +315,10 @@
       border-bottom: 1px solid var(--panel-border);
     }
 
-    .control-group:last-child {
-      border-bottom: 0;
-    }
+    .control-group:last-child { border-bottom: 0; }
 
-    .control-group label,
-    .group-title {
+    .group-title,
+    .control-group label {
       display: block;
       margin-bottom: 8px;
       font-size: 14px;
@@ -262,8 +326,8 @@
     }
 
     input[type="file"],
-    select,
     input[type="time"],
+    select,
     button {
       width: 100%;
       min-height: 42px;
@@ -280,17 +344,33 @@
       font-size: 13px;
     }
 
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 42px;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 10px;
+      background: var(--button);
+      padding: 4px;
+      cursor: pointer;
+    }
+
     button {
       cursor: pointer;
       transition: background 0.18s ease, transform 0.18s ease;
     }
 
-    button:hover {
-      background: var(--button-hover);
-    }
+    button:hover { background: var(--button-hover); }
+    button:active { transform: translateY(1px); }
 
-    button:active {
-      transform: translateY(1px);
+    button.active {
+      background: #6e542d;
+      border-color: var(--accent);
     }
 
     .button-row {
@@ -299,17 +379,12 @@
       gap: 8px;
     }
 
-    .danger {
-      background: var(--danger);
-    }
-
     .switch-row {
-      display: flex;
+      display: flex !important;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
       margin: 10px 0;
-      color: var(--text);
       font-size: 14px;
     }
 
@@ -319,18 +394,82 @@
       accent-color: var(--accent);
     }
 
+    .slider-row { margin: 13px 0; }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .slider-value {
+      color: var(--text);
+      min-width: 52px;
+      text-align: right;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .hand-card {
+      position: relative;
+      min-height: 92px;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.035);
+      color: var(--text);
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .hand-card.selected {
+      border-color: var(--accent);
+      box-shadow: inset 0 0 0 1px var(--accent);
+      background: rgba(200,169,107,0.12);
+    }
+
+    .hand-card svg {
+      width: 100%;
+      height: 58px;
+      overflow: visible;
+    }
+
+    .hand-card span {
+      display: block;
+      margin-top: 3px;
+      font-size: 12px;
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
     .quiet-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
     }
 
+    .status,
+    .instruction {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
     .status {
       margin-top: 10px;
       min-height: 1.4em;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.4;
     }
 
     .floating-controls {
@@ -338,7 +477,7 @@
       position: fixed;
       right: 12px;
       bottom: 12px;
-      z-index: 30;
+      z-index: 40;
     }
 
     .floating-controls button {
@@ -352,78 +491,140 @@
       grid-template-columns: 1fr;
     }
 
-    body.controls-hidden .panel {
-      display: none;
-    }
+    body.controls-hidden .panel { display: none; }
+    body.controls-hidden .floating-controls { display: block; }
+    body.controls-hidden .clock-shell { width: min(92vmin, 1050px); }
 
-    body.controls-hidden .floating-controls {
-      display: block;
-    }
-
-    body.controls-hidden .clock-shell {
-      width: min(92vmin, 1050px);
-    }
-
-    @media (max-width: 900px) {
-      html, body {
-        overflow: auto;
-      }
-
-      body {
-        display: block;
-      }
-
-      .clock-stage {
-        min-height: 72vh;
-      }
-
+    @media (max-width: 920px) {
+      html, body { overflow: auto; }
+      body { display: block; }
+      .clock-stage { min-height: 72vh; }
       .panel {
         height: auto;
         border-left: 0;
         border-top: 1px solid var(--panel-border);
       }
-
-      body.controls-hidden .clock-stage {
-        min-height: 100vh;
-      }
+      body.controls-hidden .clock-stage { min-height: 100vh; }
     }
   </style>
 </head>
 <body>
   <main class="clock-stage">
     <div class="clock-shell" aria-label="Analog clock">
-      <div class="clock-face">
-        <div class="default-dial" id="defaultDial"></div>
+      <div id="clockFace" class="clock-face">
+        <div id="defaultDial" class="default-dial"></div>
         <img id="dialImage" class="dial-image" alt="Uploaded clock face" />
-        <div class="brand">Vintage Clock</div>
+        <div id="brand" class="brand">Vintage Clock</div>
 
-        <div id="hourHand" class="hand hour-hand"></div>
-        <div id="minuteHand" class="hand minute-hand"></div>
-        <div id="secondHand" class="hand second-hand"></div>
+        <div class="hands-layer">
+          <div id="hourHand" class="rotating-hand hour-hand"></div>
+          <div id="minuteHand" class="rotating-hand minute-hand"></div>
+          <div id="secondHand" class="rotating-hand second-hand"></div>
+        </div>
+
         <div class="center-cap"></div>
+        <div class="crosshair"></div>
       </div>
     </div>
   </main>
 
   <aside class="panel">
-    <h1>Vintage Clock</h1>
-    <p class="subtitle">Turn a tablet or computer screen into a working vintage clock display.</p>
+    <h1>Vintage Clock Workshop</h1>
+    <p class="subtitle">Restore, align, and customize a clock face directly in your browser.</p>
 
     <section class="control-group">
-      <label for="imagePicker">Clock Face Image</label>
+      <label for="builtInFaceSelect">Built-in Clock Faces</label>
+      <select id="builtInFaceSelect">
+        <option value="default">Default Roman Dial</option>
+        <option value="faces/classic-cream.png">Classic Cream</option>
+        <option value="faces/aged-brass.png">Aged Brass</option>
+        <option value="faces/dark-victorian.png">Dark Victorian</option>
+      </select>
+
+      <label for="imagePicker" style="margin-top:14px;">Upload Your Own Clock Face</label>
       <input id="imagePicker" type="file" accept="image/*" />
+
       <div class="button-row" style="margin-top:8px;">
         <button id="removeImageButton" type="button">Use Default Dial</button>
         <button id="fitButton" type="button">Toggle Image Fit</button>
       </div>
-      <div id="imageStatus" class="status">No custom image selected.</div>
+      <div id="imageStatus" class="status">Using the default Roman dial.</div>
+    </section>
+
+    <section class="control-group">
+      <div class="group-title">Image Alignment</div>
+      <button id="adjustButton" type="button">Start Drag Adjustment</button>
+      <p class="instruction">Drag the dial with a mouse or finger and align its center hole with the red crosshair.</p>
+
+      <div class="slider-row">
+        <div class="slider-header"><span>Image Size</span><span id="zoomValue" class="slider-value">100%</span></div>
+        <input id="zoomSlider" type="range" min="40" max="220" value="100" step="1" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header"><span>Move Left / Right</span><span id="xValue" class="slider-value">0</span></div>
+        <input id="xSlider" type="range" min="-300" max="300" value="0" step="1" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header"><span>Move Up / Down</span><span id="yValue" class="slider-value">0</span></div>
+        <input id="ySlider" type="range" min="-300" max="300" value="0" step="1" />
+      </div>
+
+      <div class="button-row">
+        <button id="centerImageButton" type="button">Center Image</button>
+        <button id="resetImageButton" type="button">Reset All</button>
+      </div>
+    </section>
+
+    <section class="control-group">
+      <div class="group-title">Clock Hands</div>
+      <select id="handStyleSelect" aria-label="Hand style">
+        <option value="classic-spade">Classic Spade</option>
+        <option value="victorian">Victorian</option>
+        <option value="gothic-fleur">Gothic Fleur</option>
+        <option value="moon-spade">Moon Spade</option>
+        <option value="modern-minimal">Modern Minimal</option>
+        <option value="slim-line">Slim Line</option>
+        <option value="tapered-modern">Tapered Modern</option>
+        <option value="bauhaus">Bauhaus</option>
+      </select>
+
+      <div id="handPreviewGrid" class="preview-grid"></div>
+
+      <div class="slider-row">
+        <div class="slider-header"><span>Hand Size</span><span id="handSizeValue" class="slider-value">100%</span></div>
+        <input id="handSizeSlider" type="range" min="70" max="135" value="100" step="1" />
+      </div>
+
+      <label class="switch-row">
+        <span>Show Second Hand</span>
+        <input id="secondHandToggle" type="checkbox" checked />
+      </label>
+
+      <div class="color-grid">
+        <div>
+          <label for="handColor">Hands</label>
+          <input id="handColor" type="color" value="#171411" />
+        </div>
+        <div>
+          <label for="centerColor">Center</label>
+          <input id="centerColor" type="color" value="#b98a42" />
+        </div>
+        <div>
+          <label for="secondColor">Second</label>
+          <input id="secondColor" type="color" value="#8d211d" />
+        </div>
+      </div>
+
+      <button id="resetHandsButton" type="button" style="margin-top:8px;">Reset Hand Style</button>
     </section>
 
     <section class="control-group">
       <div class="group-title">Display</div>
       <label class="switch-row">
-        <span>Show Second Hand</span>
-        <input id="secondHandToggle" type="checkbox" checked />
+        <span>Show Dial Brand Text</span>
+        <input id="brandToggle" type="checkbox" checked />
       </label>
       <button id="fullscreenButton" type="button">Enter Fullscreen</button>
       <button id="hideControlsButton" type="button" style="margin-top:8px;">Hide Controls</button>
@@ -469,7 +670,52 @@
   <script>
     "use strict";
 
-    const romanNumerals = ["XII", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"];
+    const handStyles = {
+      "classic-spade": {
+        label: "Classic Spade",
+        hour: `<svg viewBox="0 0 100 240"><path class="hand-fill" d="M50 225 C41 213 36 194 37 172 L39 98 C27 83 20 66 24 48 C28 28 42 9 50 0 C58 9 72 28 76 48 C80 66 73 83 61 98 L63 172 C64 194 59 213 50 225 Z"/></svg>`,
+        minute: `<svg viewBox="0 0 100 320"><path class="hand-fill" d="M50 305 C42 290 39 267 40 244 L42 110 C31 94 25 76 28 56 C31 34 43 12 50 0 C57 12 69 34 72 56 C75 76 69 94 58 110 L60 244 C61 267 58 290 50 305 Z"/></svg>`
+      },
+      "victorian": {
+        label: "Victorian",
+        hour: `<svg viewBox="0 0 100 240"><path class="hand-fill" d="M50 225 C43 209 41 192 43 172 L45 137 C31 129 20 117 19 101 C30 108 39 108 46 100 C35 84 34 64 42 47 C45 40 48 32 50 20 C52 32 55 40 58 47 C66 64 65 84 54 100 C61 108 70 108 81 101 C80 117 69 129 55 137 L57 172 C59 192 57 209 50 225 Z"/></svg>`,
+        minute: `<svg viewBox="0 0 100 320"><path class="hand-fill" d="M50 305 C43 288 42 267 44 243 L46 164 C31 154 21 141 20 124 C32 132 41 131 47 121 C36 101 36 78 43 57 C46 47 49 32 50 10 C51 32 54 47 57 57 C64 78 64 101 53 121 C59 131 68 132 80 124 C79 141 69 154 54 164 L56 243 C58 267 57 288 50 305 Z"/></svg>`
+      },
+      "gothic-fleur": {
+        label: "Gothic Fleur",
+        hour: `<svg viewBox="0 0 100 240"><path class="hand-fill" d="M50 225 L43 177 L45 145 C34 138 28 127 29 114 C35 121 42 121 47 113 C36 94 37 72 46 52 L50 12 L54 52 C63 72 64 94 53 113 C58 121 65 121 71 114 C72 127 66 138 55 145 L57 177 Z"/></svg>`,
+        minute: `<svg viewBox="0 0 100 320"><path class="hand-fill" d="M50 305 L43 249 L45 182 C34 174 27 161 29 146 C36 154 43 154 48 145 C36 123 37 97 46 72 L50 8 L54 72 C63 97 64 123 52 145 C57 154 64 154 71 146 C73 161 66 174 55 182 L57 249 Z"/></svg>`
+      },
+      "moon-spade": {
+        label: "Moon Spade",
+        hour: `<svg viewBox="0 0 100 240"><path class="hand-fill" d="M50 225 L43 170 L45 110 C31 91 27 67 36 46 C42 31 47 17 50 0 C53 17 58 31 64 46 C73 67 69 91 55 110 L57 170 Z"/><circle class="hand-cutout" cx="50" cy="82" r="14"/></svg>`,
+        minute: `<svg viewBox="0 0 100 320"><path class="hand-fill" d="M50 305 L43 244 L45 124 C32 104 28 78 37 54 C42 38 47 20 50 0 C53 20 58 38 63 54 C72 78 68 104 55 124 L57 244 Z"/><circle class="hand-cutout" cx="50" cy="93" r="15"/></svg>`
+      },
+      "modern-minimal": {
+        label: "Modern Minimal",
+        hour: `<svg viewBox="0 0 100 240"><path class="hand-fill" d="M40 225 L40 18 L60 0 L60 225 Z"/></svg>`,
+        minute: `<svg viewBox="0 0 100 320"><path class="hand-fill" d="M43 305 L43 12 L57 0 L57 305 Z"/></svg>`
+      },
+      "slim-line": {
+        label: "Slim Line",
+        hour: `<svg viewBox="0 0 100 240"><path class="hand-fill" d="M47 225 L47 8 L53 0 L53 225 Z"/></svg>`,
+        minute: `<svg viewBox="0 0 100 320"><path class="hand-fill" d="M48 305 L48 4 L52 0 L52 305 Z"/></svg>`
+      },
+      "tapered-modern": {
+        label: "Tapered Modern",
+        hour: `<svg viewBox="0 0 100 240"><path class="hand-fill" d="M43 225 L34 60 L50 0 L66 60 L57 225 Z"/></svg>`,
+        minute: `<svg viewBox="0 0 100 320"><path class="hand-fill" d="M45 305 L38 68 L50 0 L62 68 L55 305 Z"/></svg>`
+      },
+      "bauhaus": {
+        label: "Bauhaus",
+        hour: `<svg viewBox="0 0 100 240"><path class="hand-fill" fill-rule="evenodd" d="M38 225 L32 40 L50 0 L68 40 L62 225 Z M44 187 L56 187 L58 62 L50 40 L42 62 Z"/></svg>`,
+        minute: `<svg viewBox="0 0 100 320"><path class="hand-fill" fill-rule="evenodd" d="M40 305 L35 45 L50 0 L65 45 L60 305 Z M46 267 L54 267 L56 63 L50 38 L44 63 Z"/></svg>`
+      }
+    };
+
+    const secondHandSvg = `<svg viewBox="0 0 100 340"><path class="second-fill" d="M47 315 L47 36 L50 0 L53 36 L53 315 Z"/><circle class="second-fill" cx="50" cy="314" r="13"/><path class="second-fill" d="M47 315 L43 338 L57 338 L53 315 Z"/></svg>`;
+
+    const romanNumerals = ["XII","I","II","III","IV","V","VI","VII","VIII","IX","X","XI"];
     const defaultDial = document.getElementById("defaultDial");
 
     for (let i = 0; i < 60; i += 1) {
@@ -487,17 +733,40 @@
       defaultDial.appendChild(numeral);
     });
 
+    const clockFace = document.getElementById("clockFace");
     const hourHand = document.getElementById("hourHand");
     const minuteHand = document.getElementById("minuteHand");
     const secondHand = document.getElementById("secondHand");
+    const brand = document.getElementById("brand");
 
+    const builtInFaceSelect = document.getElementById("builtInFaceSelect");
     const imagePicker = document.getElementById("imagePicker");
     const dialImage = document.getElementById("dialImage");
     const removeImageButton = document.getElementById("removeImageButton");
     const fitButton = document.getElementById("fitButton");
     const imageStatus = document.getElementById("imageStatus");
 
+    const adjustButton = document.getElementById("adjustButton");
+    const zoomSlider = document.getElementById("zoomSlider");
+    const xSlider = document.getElementById("xSlider");
+    const ySlider = document.getElementById("ySlider");
+    const zoomValue = document.getElementById("zoomValue");
+    const xValue = document.getElementById("xValue");
+    const yValue = document.getElementById("yValue");
+    const centerImageButton = document.getElementById("centerImageButton");
+    const resetImageButton = document.getElementById("resetImageButton");
+
+    const handStyleSelect = document.getElementById("handStyleSelect");
+    const handPreviewGrid = document.getElementById("handPreviewGrid");
+    const handSizeSlider = document.getElementById("handSizeSlider");
+    const handSizeValue = document.getElementById("handSizeValue");
     const secondHandToggle = document.getElementById("secondHandToggle");
+    const handColor = document.getElementById("handColor");
+    const centerColor = document.getElementById("centerColor");
+    const secondColor = document.getElementById("secondColor");
+    const resetHandsButton = document.getElementById("resetHandsButton");
+
+    const brandToggle = document.getElementById("brandToggle");
     const fullscreenButton = document.getElementById("fullscreenButton");
     const hideControlsButton = document.getElementById("hideControlsButton");
     const showControlsButton = document.getElementById("showControlsButton");
@@ -506,15 +775,76 @@
     const strikeToggle = document.getElementById("strikeToggle");
     const testChimeButton = document.getElementById("testChimeButton");
     const audioStatus = document.getElementById("audioStatus");
-
     const quietToggle = document.getElementById("quietToggle");
     const quietStart = document.getElementById("quietStart");
     const quietEnd = document.getElementById("quietEnd");
 
     let uploadedImageUrl = "";
-    let lastChimedHourKey = "";
     let imageFitMode = "contain";
+    let imageZoom = 1;
+    let imageX = 0;
+    let imageY = 0;
+    let isAdjusting = false;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let dragOriginX = 0;
+    let dragOriginY = 0;
+
+    let selectedHandStyle = "classic-spade";
+    let handScale = 1;
+    let lastChimedHourKey = "";
     let audioContext = null;
+
+    function renderHands() {
+      const style = handStyles[selectedHandStyle];
+      hourHand.innerHTML = style.hour;
+      minuteHand.innerHTML = style.minute;
+      secondHand.innerHTML = secondHandSvg;
+      applyHandScale();
+      updateHandSelectionUI();
+    }
+
+    function renderHandPreviews() {
+      handPreviewGrid.innerHTML = "";
+
+      Object.entries(handStyles).forEach(([key, style]) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "hand-card";
+        card.dataset.style = key;
+        card.innerHTML = `
+          <svg viewBox="0 0 180 90" aria-hidden="true">
+            <g transform="translate(55,82) scale(.25) translate(-50,-225)">${style.hour.replace(/<svg[^>]*>|<\/svg>/g, "")}</g>
+            <g transform="translate(125,82) scale(.19) translate(-50,-305)">${style.minute.replace(/<svg[^>]*>|<\/svg>/g, "")}</g>
+            <circle cx="55" cy="82" r="5" fill="var(--center-color)"/>
+            <circle cx="125" cy="82" r="5" fill="var(--center-color)"/>
+          </svg>
+          <span>${style.label}</span>`;
+        card.addEventListener("click", () => {
+          selectedHandStyle = key;
+          handStyleSelect.value = key;
+          renderHands();
+        });
+        handPreviewGrid.appendChild(card);
+      });
+
+      updateHandSelectionUI();
+    }
+
+    function updateHandSelectionUI() {
+      document.querySelectorAll(".hand-card").forEach(card => {
+        card.classList.toggle("selected", card.dataset.style === selectedHandStyle);
+      });
+    }
+
+    function applyHandScale() {
+      const scale = handScale;
+      hourHand.style.scale = scale;
+      minuteHand.style.scale = scale;
+      secondHand.style.scale = scale;
+      handSizeValue.textContent = `${Math.round(scale * 100)}%`;
+    }
 
     function updateClock() {
       const now = new Date();
@@ -531,24 +861,101 @@
       requestAnimationFrame(updateClock);
     }
 
+    function applyImageTransform() {
+      dialImage.style.transform =
+        `translate(calc(-50% + ${imageX}px), calc(-50% + ${imageY}px)) scale(${imageZoom})`;
+
+      zoomSlider.value = Math.round(imageZoom * 100);
+      xSlider.value = Math.round(imageX);
+      ySlider.value = Math.round(imageY);
+      zoomValue.textContent = `${Math.round(imageZoom * 100)}%`;
+      xValue.textContent = `${Math.round(imageX)}`;
+      yValue.textContent = `${Math.round(imageY)}`;
+    }
+
+    function resetImageTransform() {
+      imageZoom = 1;
+      imageX = 0;
+      imageY = 0;
+      imageFitMode = "contain";
+      dialImage.style.objectFit = imageFitMode;
+      applyImageTransform();
+    }
+
+    function stopAdjustment() {
+      isAdjusting = false;
+      isDragging = false;
+      clockFace.classList.remove("adjusting");
+      adjustButton.classList.remove("active");
+      adjustButton.textContent = "Start Drag Adjustment";
+    }
+
+    function showDefaultDial() {
+      if (uploadedImageUrl) {
+        URL.revokeObjectURL(uploadedImageUrl);
+        uploadedImageUrl = "";
+      }
+
+      stopAdjustment();
+      dialImage.removeAttribute("src");
+      dialImage.style.display = "none";
+      imagePicker.value = "";
+      builtInFaceSelect.value = "default";
+      resetImageTransform();
+      imageStatus.textContent = "Using the default Roman dial.";
+    }
+
+    function loadBuiltInFace(path, label) {
+      if (uploadedImageUrl) {
+        URL.revokeObjectURL(uploadedImageUrl);
+        uploadedImageUrl = "";
+      }
+
+      stopAdjustment();
+      imagePicker.value = "";
+      resetImageTransform();
+
+      dialImage.onload = () => {
+        dialImage.style.display = "block";
+        imageStatus.textContent = `Using built-in face: ${label}`;
+      };
+
+      dialImage.onerror = () => {
+        dialImage.style.display = "none";
+        imageStatus.textContent =
+          `Could not load ${label}. Check that the PNG file is inside the faces folder.`;
+      };
+
+      dialImage.src = path;
+    }
+
+    builtInFaceSelect.addEventListener("change", () => {
+      const selectedPath = builtInFaceSelect.value;
+      const selectedLabel =
+        builtInFaceSelect.options[builtInFaceSelect.selectedIndex].text;
+
+      if (selectedPath === "default") {
+        showDefaultDial();
+      } else {
+        loadBuiltInFace(selectedPath, selectedLabel);
+      }
+    });
+
     imagePicker.addEventListener("change", () => {
       const file = imagePicker.files && imagePicker.files[0];
-
-      if (!file) {
-        return;
-      }
+      if (!file) return;
 
       if (!file.type.startsWith("image/")) {
         imageStatus.textContent = "Please choose a valid image file.";
         return;
       }
 
-      if (uploadedImageUrl) {
-        URL.revokeObjectURL(uploadedImageUrl);
-      }
+      if (uploadedImageUrl) URL.revokeObjectURL(uploadedImageUrl);
 
+      builtInFaceSelect.value = "default";
       uploadedImageUrl = URL.createObjectURL(file);
       dialImage.onload = () => {
+        resetImageTransform();
         dialImage.style.display = "block";
         imageStatus.textContent = `Using: ${file.name}`;
       };
@@ -558,17 +965,7 @@
       dialImage.src = uploadedImageUrl;
     });
 
-    removeImageButton.addEventListener("click", () => {
-      if (uploadedImageUrl) {
-        URL.revokeObjectURL(uploadedImageUrl);
-        uploadedImageUrl = "";
-      }
-
-      dialImage.removeAttribute("src");
-      dialImage.style.display = "none";
-      imagePicker.value = "";
-      imageStatus.textContent = "No custom image selected.";
-    });
+    removeImageButton.addEventListener("click", showDefaultDial);
 
     fitButton.addEventListener("click", () => {
       imageFitMode = imageFitMode === "contain" ? "cover" : "contain";
@@ -578,11 +975,124 @@
         : "Image fit: fill the clock face.";
     });
 
+    adjustButton.addEventListener("click", () => {
+      if (!uploadedImageUrl) {
+        imageStatus.textContent = "Upload a clock face image before adjusting it.";
+        return;
+      }
+
+      isAdjusting = !isAdjusting;
+      clockFace.classList.toggle("adjusting", isAdjusting);
+      adjustButton.classList.toggle("active", isAdjusting);
+      adjustButton.textContent = isAdjusting ? "Finish Drag Adjustment" : "Start Drag Adjustment";
+    });
+
+    zoomSlider.addEventListener("input", () => {
+      imageZoom = Number(zoomSlider.value) / 100;
+      applyImageTransform();
+    });
+
+    xSlider.addEventListener("input", () => {
+      imageX = Number(xSlider.value);
+      applyImageTransform();
+    });
+
+    ySlider.addEventListener("input", () => {
+      imageY = Number(ySlider.value);
+      applyImageTransform();
+    });
+
+    centerImageButton.addEventListener("click", () => {
+      imageX = 0;
+      imageY = 0;
+      applyImageTransform();
+    });
+
+    resetImageButton.addEventListener("click", resetImageTransform);
+
+    clockFace.addEventListener("pointerdown", event => {
+      if (!isAdjusting || !uploadedImageUrl) return;
+      isDragging = true;
+      dragStartX = event.clientX;
+      dragStartY = event.clientY;
+      dragOriginX = imageX;
+      dragOriginY = imageY;
+      clockFace.setPointerCapture(event.pointerId);
+    });
+
+    clockFace.addEventListener("pointermove", event => {
+      if (!isDragging || !isAdjusting) return;
+      imageX = Math.max(-300, Math.min(300, dragOriginX + event.clientX - dragStartX));
+      imageY = Math.max(-300, Math.min(300, dragOriginY + event.clientY - dragStartY));
+      applyImageTransform();
+    });
+
+    function endDrag(event) {
+      if (!isDragging) return;
+      isDragging = false;
+      if (clockFace.hasPointerCapture(event.pointerId)) {
+        clockFace.releasePointerCapture(event.pointerId);
+      }
+    }
+
+    clockFace.addEventListener("pointerup", endDrag);
+    clockFace.addEventListener("pointercancel", endDrag);
+
+    clockFace.addEventListener("wheel", event => {
+      if (!isAdjusting || !uploadedImageUrl) return;
+      event.preventDefault();
+      imageZoom = Math.max(0.4, Math.min(2.2, imageZoom + (event.deltaY < 0 ? 0.05 : -0.05)));
+      applyImageTransform();
+    }, { passive: false });
+
+    handStyleSelect.addEventListener("change", () => {
+      selectedHandStyle = handStyleSelect.value;
+      renderHands();
+    });
+
+    handSizeSlider.addEventListener("input", () => {
+      handScale = Number(handSizeSlider.value) / 100;
+      applyHandScale();
+    });
+
     secondHandToggle.addEventListener("change", () => {
       secondHand.style.display = secondHandToggle.checked ? "block" : "none";
     });
 
+    handColor.addEventListener("input", () => {
+      document.documentElement.style.setProperty("--hand-color", handColor.value);
+      document.documentElement.style.setProperty("--hand-highlight", handColor.value);
+    });
+
+    centerColor.addEventListener("input", () => {
+      document.documentElement.style.setProperty("--center-color", centerColor.value);
+    });
+
+    secondColor.addEventListener("input", () => {
+      document.documentElement.style.setProperty("--second-color", secondColor.value);
+    });
+
+    resetHandsButton.addEventListener("click", () => {
+      selectedHandStyle = "classic-spade";
+      handStyleSelect.value = selectedHandStyle;
+      handScale = 1;
+      handSizeSlider.value = 100;
+      handColor.value = "#171411";
+      centerColor.value = "#b98a42";
+      secondColor.value = "#8d211d";
+      document.documentElement.style.setProperty("--hand-color", handColor.value);
+      document.documentElement.style.setProperty("--hand-highlight", "#4f4337");
+      document.documentElement.style.setProperty("--center-color", centerColor.value);
+      document.documentElement.style.setProperty("--second-color", secondColor.value);
+      renderHands();
+    });
+
+    brandToggle.addEventListener("change", () => {
+      brand.style.display = brandToggle.checked ? "block" : "none";
+    });
+
     hideControlsButton.addEventListener("click", () => {
+      stopAdjustment();
       document.body.classList.add("controls-hidden");
     });
 
@@ -594,10 +1104,8 @@
       try {
         if (!document.fullscreenElement) {
           await document.documentElement.requestFullscreen();
-          fullscreenButton.textContent = "Exit Fullscreen";
         } else {
           await document.exitFullscreen();
-          fullscreenButton.textContent = "Enter Fullscreen";
         }
       } catch (error) {
         console.error(error);
@@ -606,17 +1114,13 @@
     });
 
     document.addEventListener("fullscreenchange", () => {
-      fullscreenButton.textContent = document.fullscreenElement
-        ? "Exit Fullscreen"
-        : "Enter Fullscreen";
+      fullscreenButton.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Enter Fullscreen";
     });
 
     function getAudioContext() {
       if (!audioContext) {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextClass) {
-          throw new Error("Web Audio is not supported in this browser.");
-        }
+        if (!AudioContextClass) throw new Error("Web Audio is not supported.");
         audioContext = new AudioContextClass();
       }
       return audioContext;
@@ -629,41 +1133,31 @@
 
       oscillator.type = "sine";
       oscillator.frequency.setValueAtTime(frequency, startTime);
-
       gain.gain.setValueAtTime(0.0001, startTime);
       gain.gain.exponentialRampToValueAtTime(volume, startTime + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
       oscillator.connect(gain);
       gain.connect(context.destination);
-
       oscillator.start(startTime);
       oscillator.stop(startTime + duration + 0.05);
     }
 
     function playWestminsterSequence(includeStrike = false, hour = new Date().getHours()) {
       const context = getAudioContext();
-
-      if (context.state === "suspended") {
-        context.resume();
-      }
+      if (context.state === "suspended") context.resume();
 
       const start = context.currentTime + 0.08;
-      const notes = [
-        { frequency: 659.25, offset: 0.00 },
-        { frequency: 523.25, offset: 0.42 },
-        { frequency: 587.33, offset: 0.84 },
-        { frequency: 392.00, offset: 1.26 }
-      ];
-
-      notes.forEach(note => {
-        playBellNote(note.frequency, start + note.offset, 1.0, 0.14);
-      });
+      [
+        [659.25, 0.00],
+        [523.25, 0.42],
+        [587.33, 0.84],
+        [392.00, 1.26]
+      ].forEach(([frequency, offset]) => playBellNote(frequency, start + offset, 1.0, 0.14));
 
       if (includeStrike) {
         const strikeCount = hour % 12 || 12;
         const strikeStart = start + 2.2;
-
         for (let i = 0; i < strikeCount; i += 1) {
           playBellNote(261.63, strikeStart + i * 1.05, 1.6, 0.20);
         }
@@ -676,43 +1170,20 @@
     }
 
     function isQuietTime(date) {
-      if (!quietToggle.checked) {
-        return false;
-      }
-
+      if (!quietToggle.checked) return false;
       const current = date.getHours() * 60 + date.getMinutes();
       const start = timeToMinutes(quietStart.value);
       const end = timeToMinutes(quietEnd.value);
-
-      if (start === end) {
-        return false;
-      }
-
-      if (start < end) {
-        return current >= start && current < end;
-      }
-
-      return current >= start || current < end;
+      if (start === end) return false;
+      return start < end ? current >= start && current < end : current >= start || current < end;
     }
 
     function maybePlayHourlyChime(now) {
-      if (!chimeToggle.checked) {
-        return;
-      }
-
-      if (isQuietTime(now)) {
-        return;
-      }
-
-      if (now.getMinutes() !== 0 || now.getSeconds() !== 0) {
-        return;
-      }
+      if (!chimeToggle.checked || isQuietTime(now)) return;
+      if (now.getMinutes() !== 0 || now.getSeconds() !== 0) return;
 
       const hourKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${now.getHours()}`;
-
-      if (hourKey === lastChimedHourKey) {
-        return;
-      }
+      if (hourKey === lastChimedHourKey) return;
 
       lastChimedHourKey = hourKey;
       playWestminsterSequence(strikeToggle.checked, now.getHours());
@@ -722,9 +1193,7 @@
       if (chimeToggle.checked) {
         try {
           const context = getAudioContext();
-          if (context.state === "suspended") {
-            await context.resume();
-          }
+          if (context.state === "suspended") await context.resume();
           audioStatus.textContent = "Hourly chime is enabled.";
         } catch (error) {
           console.error(error);
@@ -739,9 +1208,7 @@
     testChimeButton.addEventListener("click", async () => {
       try {
         const context = getAudioContext();
-        if (context.state === "suspended") {
-          await context.resume();
-        }
+        if (context.state === "suspended") await context.resume();
         playWestminsterSequence(strikeToggle.checked, new Date().getHours());
         audioStatus.textContent = "Playing test chime.";
       } catch (error) {
@@ -751,11 +1218,12 @@
     });
 
     window.addEventListener("beforeunload", () => {
-      if (uploadedImageUrl) {
-        URL.revokeObjectURL(uploadedImageUrl);
-      }
+      if (uploadedImageUrl) URL.revokeObjectURL(uploadedImageUrl);
     });
 
+    renderHands();
+    renderHandPreviews();
+    applyImageTransform();
     updateClock();
   </script>
 </body>
