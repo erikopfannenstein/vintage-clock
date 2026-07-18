@@ -690,15 +690,74 @@
 
     <section class="control-group">
       <div class="group-title">Chime</div>
+
       <label class="switch-row">
-        <span>Enable Westminster Chime</span>
+        <span>Enable Hourly Chime</span>
         <input id="chimeToggle" type="checkbox" />
       </label>
-      <label class="switch-row">
-        <span>Strike the Hour</span>
-        <input id="strikeToggle" type="checkbox" checked />
-      </label>
-      <button id="testChimeButton" type="button">Test Chime</button>
+
+      <label for="chimeSoundSelect">Chime Sound</label>
+      <select id="chimeSoundSelect">
+        <optgroup label="Cuckoo Clock">
+          <option value="chimes/cuckoo01.mp3">Cuckoo Clock I</option>
+          <option value="chimes/cuckoo02.mp3">Cuckoo Clock II</option>
+        </optgroup>
+        <optgroup label="Grandfather Clock">
+          <option value="chimes/grandfather01.mp3">Grandfather Clock I</option>
+          <option value="chimes/grandfather02.mp3">Grandfather Clock II</option>
+          <option value="chimes/grandfather03.mp3">Grandfather Clock III</option>
+        </optgroup>
+        <optgroup label="Temple Bell">
+          <option value="chimes/temple01.mp3">Temple Bell I</option>
+          <option value="chimes/temple02.mp3">Temple Bell II</option>
+          <option value="chimes/temple03.mp3">Temple Bell III</option>
+          <option value="chimes/temple04.mp3">Temple Bell IV</option>
+        </optgroup>
+        <optgroup label="Westminster">
+          <option value="chimes/westminster01.mp3">Westminster I</option>
+          <option value="chimes/westminster02.mp3">Westminster II</option>
+          <option value="chimes/westminster03.mp3">Westminster III</option>
+          <option value="chimes/westminster04.mp3">Westminster IV</option>
+        </optgroup>
+        <optgroup label="Custom">
+          <option id="customChimeOption" value="custom" disabled>Uploaded Custom Chime</option>
+        </optgroup>
+      </select>
+
+      <label for="repeatCountSelect" style="margin-top:12px;">Repeat Count</label>
+      <select id="repeatCountSelect">
+        <option value="1">Once</option>
+        <option value="2">Twice</option>
+        <option value="4">Four Times</option>
+        <option value="hour">Current Hour</option>
+      </select>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>Strike Spacing</span>
+          <span id="strikeSpacingValue" class="slider-value">2.5 sec</span>
+        </div>
+        <input id="strikeSpacingSlider" type="range" min="0.5" max="8" value="2.5" step="0.1" />
+        <div class="instruction">Shorter spacing overlaps the ringing tail; longer spacing lets each strike fade.</div>
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>Sound Tail</span>
+          <span id="soundTailValue" class="slider-value">15.0 sec</span>
+        </div>
+        <input id="soundTailSlider" type="range" min="0.5" max="15" value="15" step="0.1" />
+        <div class="instruction">Shortens a long recording with a gentle fade. It cannot extend the original recording.</div>
+      </div>
+
+      <label for="customChimePicker" style="margin-top:12px;">Upload Custom Chime</label>
+      <input id="customChimePicker" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg" />
+      <div class="instruction">Maximum duration: 15 seconds. The uploaded sound stays in this browser session.</div>
+
+      <div class="button-row" style="margin-top:10px;">
+        <button id="testChimeButton" type="button">Preview</button>
+        <button id="stopChimeButton" type="button">Stop</button>
+      </div>
       <div id="audioStatus" class="status">Sound is off.</div>
     </section>
 
@@ -834,8 +893,16 @@
     const showControlsButton = document.getElementById("showControlsButton");
 
     const chimeToggle = document.getElementById("chimeToggle");
-    const strikeToggle = document.getElementById("strikeToggle");
+    const chimeSoundSelect = document.getElementById("chimeSoundSelect");
+    const repeatCountSelect = document.getElementById("repeatCountSelect");
+    const strikeSpacingSlider = document.getElementById("strikeSpacingSlider");
+    const strikeSpacingValue = document.getElementById("strikeSpacingValue");
+    const soundTailSlider = document.getElementById("soundTailSlider");
+    const soundTailValue = document.getElementById("soundTailValue");
+    const customChimePicker = document.getElementById("customChimePicker");
+    const customChimeOption = document.getElementById("customChimeOption");
     const testChimeButton = document.getElementById("testChimeButton");
+    const stopChimeButton = document.getElementById("stopChimeButton");
     const audioStatus = document.getElementById("audioStatus");
     const quietToggle = document.getElementById("quietToggle");
     const quietStart = document.getElementById("quietStart");
@@ -857,6 +924,10 @@
     let handScale = 1;
     let secondHandLength = 1;
     let lastChimedHourKey = "";
+    let customChimeUrl = "";
+    let customChimeName = "";
+    const activeChimeAudios = new Set();
+    const chimeTimers = new Set();
     let audioContext = null;
 
     function renderHands() {
@@ -1192,51 +1263,133 @@
       fullscreenButton.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Enter Fullscreen";
     });
 
-    function getAudioContext() {
-      if (!audioContext) {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextClass) throw new Error("Web Audio is not supported.");
-        audioContext = new AudioContextClass();
-      }
-      return audioContext;
+    function saveChimeSettings() {
+      const settings = {
+        enabled: chimeToggle.checked,
+        sound: chimeSoundSelect.value === "custom" ? "" : chimeSoundSelect.value,
+        repeat: repeatCountSelect.value,
+        spacing: strikeSpacingSlider.value,
+        tail: soundTailSlider.value,
+        quietEnabled: quietToggle.checked,
+        quietStart: quietStart.value,
+        quietEnd: quietEnd.value
+      };
+      localStorage.setItem("vintageClockChimeSettings", JSON.stringify(settings));
     }
 
-    function playBellNote(frequency, startTime, duration = 1.2, volume = 0.16) {
-      const context = getAudioContext();
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-
-      oscillator.type = "sine";
-      oscillator.frequency.setValueAtTime(frequency, startTime);
-      gain.gain.setValueAtTime(0.0001, startTime);
-      gain.gain.exponentialRampToValueAtTime(volume, startTime + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-
-      oscillator.connect(gain);
-      gain.connect(context.destination);
-      oscillator.start(startTime);
-      oscillator.stop(startTime + duration + 0.05);
-    }
-
-    function playWestminsterSequence(includeStrike = false, hour = new Date().getHours()) {
-      const context = getAudioContext();
-      if (context.state === "suspended") context.resume();
-
-      const start = context.currentTime + 0.08;
-      [
-        [659.25, 0.00],
-        [523.25, 0.42],
-        [587.33, 0.84],
-        [392.00, 1.26]
-      ].forEach(([frequency, offset]) => playBellNote(frequency, start + offset, 1.0, 0.14));
-
-      if (includeStrike) {
-        const strikeCount = hour % 12 || 12;
-        const strikeStart = start + 2.2;
-        for (let i = 0; i < strikeCount; i += 1) {
-          playBellNote(261.63, strikeStart + i * 1.05, 1.6, 0.20);
+    function loadChimeSettings() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("vintageClockChimeSettings") || "null");
+        if (!saved) return;
+        chimeToggle.checked = Boolean(saved.enabled);
+        if (saved.sound && [...chimeSoundSelect.options].some(option => option.value === saved.sound)) {
+          chimeSoundSelect.value = saved.sound;
         }
+        if (saved.repeat) repeatCountSelect.value = saved.repeat;
+        if (saved.spacing) strikeSpacingSlider.value = saved.spacing;
+        if (saved.tail) soundTailSlider.value = saved.tail;
+        if (typeof saved.quietEnabled === "boolean") quietToggle.checked = saved.quietEnabled;
+        if (saved.quietStart) quietStart.value = saved.quietStart;
+        if (saved.quietEnd) quietEnd.value = saved.quietEnd;
+      } catch (error) {
+        console.warn("Could not load saved chime settings.", error);
       }
+    }
+
+    function updateChimeLabels() {
+      strikeSpacingValue.textContent = `${Number(strikeSpacingSlider.value).toFixed(1)} sec`;
+      soundTailValue.textContent = `${Number(soundTailSlider.value).toFixed(1)} sec`;
+    }
+
+    function getSelectedChimeSource() {
+      if (chimeSoundSelect.value === "custom") {
+        if (!customChimeUrl) throw new Error("Upload a custom chime first.");
+        return customChimeUrl;
+      }
+      return chimeSoundSelect.value;
+    }
+
+    function getRepeatCount(hour = new Date().getHours()) {
+      return repeatCountSelect.value === "hour"
+        ? (hour % 12 || 12)
+        : Number(repeatCountSelect.value);
+    }
+
+    function stopAllChimes() {
+      chimeTimers.forEach(timer => clearTimeout(timer));
+      chimeTimers.clear();
+
+      activeChimeAudios.forEach(audio => {
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+        } catch (error) {
+          console.warn(error);
+        }
+      });
+      activeChimeAudios.clear();
+      audioStatus.textContent = chimeToggle.checked ? "Hourly chime is enabled." : "Sound is off.";
+    }
+
+    function fadeAndStopAudio(audio, tailSeconds) {
+      const fadeDuration = Math.min(0.25, Math.max(0.08, tailSeconds * 0.12));
+      const fadeStartMs = Math.max(0, (tailSeconds - fadeDuration) * 1000);
+      const fadeTimer = setTimeout(() => {
+        const steps = 8;
+        let step = 0;
+        const initialVolume = audio.volume;
+        const interval = setInterval(() => {
+          step += 1;
+          audio.volume = Math.max(0, initialVolume * (1 - step / steps));
+          if (step >= steps) {
+            clearInterval(interval);
+            audio.pause();
+            activeChimeAudios.delete(audio);
+          }
+        }, (fadeDuration * 1000) / steps);
+      }, fadeStartMs);
+      chimeTimers.add(fadeTimer);
+    }
+
+    function playOneChime(source, delayMs, tailSeconds) {
+      const timer = setTimeout(async () => {
+        chimeTimers.delete(timer);
+        const audio = new Audio(source);
+        audio.preload = "auto";
+        activeChimeAudios.add(audio);
+
+        const cleanUp = () => activeChimeAudios.delete(audio);
+        audio.addEventListener("ended", cleanUp, { once: true });
+        audio.addEventListener("error", () => {
+          cleanUp();
+          audioStatus.textContent = "The selected chime could not be played.";
+        }, { once: true });
+
+        try {
+          await audio.play();
+          fadeAndStopAudio(audio, tailSeconds);
+        } catch (error) {
+          cleanUp();
+          console.error(error);
+          audioStatus.textContent = "Tap Preview once to allow sound in this browser.";
+        }
+      }, delayMs);
+      chimeTimers.add(timer);
+    }
+
+    function playSelectedChime(hour = new Date().getHours()) {
+      stopAllChimes();
+      const source = getSelectedChimeSource();
+      const repeatCount = getRepeatCount(hour);
+      const spacingMs = Number(strikeSpacingSlider.value) * 1000;
+      const tailSeconds = Number(soundTailSlider.value);
+
+      for (let i = 0; i < repeatCount; i += 1) {
+        playOneChime(source, i * spacingMs, tailSeconds);
+      }
+
+      const soundName = chimeSoundSelect.options[chimeSoundSelect.selectedIndex].text;
+      audioStatus.textContent = `Playing ${soundName} × ${repeatCount}.`;
     }
 
     function timeToMinutes(value) {
@@ -1261,39 +1414,91 @@
       if (hourKey === lastChimedHourKey) return;
 
       lastChimedHourKey = hourKey;
-      playWestminsterSequence(strikeToggle.checked, now.getHours());
-    }
-
-    chimeToggle.addEventListener("change", async () => {
-      if (chimeToggle.checked) {
-        try {
-          const context = getAudioContext();
-          if (context.state === "suspended") await context.resume();
-          audioStatus.textContent = "Hourly chime is enabled.";
-        } catch (error) {
-          console.error(error);
-          chimeToggle.checked = false;
-          audioStatus.textContent = "Sound is unavailable in this browser.";
-        }
-      } else {
-        audioStatus.textContent = "Sound is off.";
-      }
-    });
-
-    testChimeButton.addEventListener("click", async () => {
       try {
-        const context = getAudioContext();
-        if (context.state === "suspended") await context.resume();
-        playWestminsterSequence(strikeToggle.checked, new Date().getHours());
-        audioStatus.textContent = "Playing test chime.";
+        playSelectedChime(now.getHours());
       } catch (error) {
         console.error(error);
-        audioStatus.textContent = "Sound is unavailable in this browser.";
+        audioStatus.textContent = error.message;
+      }
+    }
+
+    chimeToggle.addEventListener("change", () => {
+      audioStatus.textContent = chimeToggle.checked ? "Hourly chime is enabled." : "Sound is off.";
+      saveChimeSettings();
+    });
+
+    [chimeSoundSelect, repeatCountSelect, quietToggle, quietStart, quietEnd].forEach(control => {
+      control.addEventListener("change", saveChimeSettings);
+    });
+
+    strikeSpacingSlider.addEventListener("input", () => {
+      updateChimeLabels();
+      saveChimeSettings();
+    });
+
+    soundTailSlider.addEventListener("input", () => {
+      updateChimeLabels();
+      saveChimeSettings();
+    });
+
+    customChimePicker.addEventListener("change", () => {
+      const file = customChimePicker.files && customChimePicker.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("audio/") && !/\.(mp3|wav|m4a|aac|ogg)$/i.test(file.name)) {
+        customChimePicker.value = "";
+        audioStatus.textContent = "Please choose a valid audio file.";
+        return;
+      }
+
+      const temporaryUrl = URL.createObjectURL(file);
+      const probe = new Audio();
+      probe.preload = "metadata";
+      probe.src = temporaryUrl;
+
+      probe.addEventListener("loadedmetadata", () => {
+        if (!Number.isFinite(probe.duration) || probe.duration > 15.05) {
+          URL.revokeObjectURL(temporaryUrl);
+          customChimePicker.value = "";
+          audioStatus.textContent = "Custom chimes must be 15 seconds or shorter.";
+          return;
+        }
+
+        if (customChimeUrl) URL.revokeObjectURL(customChimeUrl);
+        customChimeUrl = temporaryUrl;
+        customChimeName = file.name;
+        customChimeOption.disabled = false;
+        customChimeOption.textContent = `Custom: ${file.name}`;
+        chimeSoundSelect.value = "custom";
+        audioStatus.textContent = `Loaded ${file.name} (${probe.duration.toFixed(1)} sec).`;
+      }, { once: true });
+
+      probe.addEventListener("error", () => {
+        URL.revokeObjectURL(temporaryUrl);
+        customChimePicker.value = "";
+        audioStatus.textContent = "The selected audio file could not be read.";
+      }, { once: true });
+    });
+
+    testChimeButton.addEventListener("click", () => {
+      try {
+        playSelectedChime(new Date().getHours());
+      } catch (error) {
+        console.error(error);
+        audioStatus.textContent = error.message;
       }
     });
 
+    stopChimeButton.addEventListener("click", stopAllChimes);
+
+    loadChimeSettings();
+    updateChimeLabels();
+    audioStatus.textContent = chimeToggle.checked ? "Hourly chime is enabled." : "Sound is off.";
+
     window.addEventListener("beforeunload", () => {
+      stopAllChimes();
       if (uploadedImageUrl) URL.revokeObjectURL(uploadedImageUrl);
+      if (customChimeUrl) URL.revokeObjectURL(customChimeUrl);
     });
 
     renderHands();
