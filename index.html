@@ -211,9 +211,53 @@
       z-index: 10;
     }
 
-    .second-hand svg {
-      width: 7%;
-      height: 48%;
+    /* The lower end of this shaft is fixed precisely at the dial center. */
+    .second-hand-shaft {
+      position: absolute;
+      left: 50%;
+      bottom: 50%;
+      width: clamp(2px, 0.42%, 5px);
+      height: var(--second-hand-length, 46%);
+      transform: translateX(-50%);
+      transform-origin: 50% 100%;
+      border-radius: 999px 999px 2px 2px;
+      background: var(--second-color);
+      box-shadow: 0 0 0 0.5px rgba(50,0,0,0.38);
+    }
+
+    .second-hand-tip {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 260%;
+      aspect-ratio: 1;
+      transform: translate(-50%, -34%) rotate(45deg);
+      background: var(--second-color);
+      border-radius: 20% 70% 20% 70%;
+    }
+
+    .second-hand-tail {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: clamp(2px, 0.34%, 4px);
+      height: 8%;
+      transform: translateX(-50%);
+      background: var(--second-color);
+      border-radius: 0 0 999px 999px;
+    }
+
+    .second-hand-tail::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -22%;
+      width: 430%;
+      aspect-ratio: 1;
+      transform: translateX(-50%);
+      border: clamp(1px, 0.18vmin, 3px) solid var(--second-color);
+      border-radius: 50%;
+      background: transparent;
     }
 
     .hand-fill {
@@ -597,6 +641,11 @@
         <input id="handSizeSlider" type="range" min="70" max="135" value="100" step="1" />
       </div>
 
+      <div class="slider-row">
+        <div class="slider-header"><span>Second Hand Length</span><span id="secondHandLengthValue" class="slider-value">100%</span></div>
+        <input id="secondHandLengthSlider" type="range" min="70" max="145" value="100" step="1" />
+      </div>
+
       <label class="switch-row">
         <span>Show Second Hand</span>
         <input id="secondHandToggle" type="checkbox" checked />
@@ -713,7 +762,9 @@
       }
     };
 
-    const secondHandSvg = `<svg viewBox="0 0 100 340"><path class="second-fill" d="M47 315 L47 36 L50 0 L53 36 L53 315 Z"/><circle class="second-fill" cx="50" cy="314" r="13"/><path class="second-fill" d="M47 315 L43 338 L57 338 L53 315 Z"/></svg>`;
+    const secondHandMarkup = `
+      <div class="second-hand-shaft"><span class="second-hand-tip"></span></div>
+      <div class="second-hand-tail"></div>`;
 
     const romanNumerals = ["XII","I","II","III","IV","V","VI","VII","VIII","IX","X","XI"];
     const defaultDial = document.getElementById("defaultDial");
@@ -760,6 +811,8 @@
     const handPreviewGrid = document.getElementById("handPreviewGrid");
     const handSizeSlider = document.getElementById("handSizeSlider");
     const handSizeValue = document.getElementById("handSizeValue");
+    const secondHandLengthSlider = document.getElementById("secondHandLengthSlider");
+    const secondHandLengthValue = document.getElementById("secondHandLengthValue");
     const secondHandToggle = document.getElementById("secondHandToggle");
     const handColor = document.getElementById("handColor");
     const centerColor = document.getElementById("centerColor");
@@ -793,6 +846,7 @@
 
     let selectedHandStyle = "classic-spade";
     let handScale = 1;
+    let secondHandLength = 1;
     let lastChimedHourKey = "";
     let audioContext = null;
 
@@ -800,7 +854,7 @@
       const style = handStyles[selectedHandStyle];
       hourHand.innerHTML = style.hour;
       minuteHand.innerHTML = style.minute;
-      secondHand.innerHTML = secondHandSvg;
+      secondHand.innerHTML = secondHandMarkup;
       applyHandScale();
       updateHandSelectionUI();
     }
@@ -840,10 +894,15 @@
 
     function applyHandScale() {
       const scale = handScale;
-      hourHand.style.scale = scale;
-      minuteHand.style.scale = scale;
-      secondHand.style.scale = scale;
+      hourHand.style.scale = `${scale}`;
+      minuteHand.style.scale = `${scale}`;
+
+      /* Length changes only the shaft above the center; its bottom stays anchored. */
+      const secondLengthPercent = 46 * secondHandLength;
+      secondHand.style.setProperty("--second-hand-length", `${secondLengthPercent}%`);
+
       handSizeValue.textContent = `${Math.round(scale * 100)}%`;
+      secondHandLengthValue.textContent = `${Math.round(secondHandLength * 100)}%`;
     }
 
     function updateClock() {
@@ -1055,6 +1114,11 @@
       applyHandScale();
     });
 
+    secondHandLengthSlider.addEventListener("input", () => {
+      secondHandLength = Number(secondHandLengthSlider.value) / 100;
+      applyHandScale();
+    });
+
     secondHandToggle.addEventListener("change", () => {
       secondHand.style.display = secondHandToggle.checked ? "block" : "none";
     });
@@ -1076,7 +1140,9 @@
       selectedHandStyle = "classic-spade";
       handStyleSelect.value = selectedHandStyle;
       handScale = 1;
+      secondHandLength = 1;
       handSizeSlider.value = 100;
+      secondHandLengthSlider.value = 100;
       handColor.value = "#171411";
       centerColor.value = "#b98a42";
       secondColor.value = "#8d211d";
