@@ -933,8 +933,8 @@ const centerCapSizeValue=document.getElementById("centerCapSizeValue");
     let lastChimedHourKey = "";
     let customChimeUrl = "";
     let customChimeName = "";
-    const activeChimeAudios = new Set();
-    const chimeTimers = new Set();
+    const activeChimeNodes = new Set();
+    const chimeBufferCache = new Map();
     let audioContext = null;
 
     function renderHands() {
@@ -1326,78 +1326,74 @@ centerCapSize.addEventListener("input",()=>{
       return chimeSoundSelect.value;
     }
 
+    function isWestminsterSelected() {
+      return chimeSoundSelect.value.toLowerCase().includes("westminster");
+    }
+
     function getRepeatCount(hour = new Date().getHours()) {
-      return repeatCountSelect.value === "hour"
-        ? (hour % 12 || 12)
-        : Number(repeatCountSelect.value);
+      // Westminster files already contain the complete musical sequence.
+      return isWestminsterSelected()
+        ? 1
+        : repeatCountSelect.value === "hour"
+          ? (hour % 12 || 12)
+          : Number(repeatCountSelect.value);
+    }
+
+    async function ensureAudioContext() {
+      if (!audioContext) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) throw new Error("This browser does not support Web Audio.");
+        audioContext = new AudioContextClass();
+      }
+      if (audioContext.state === "suspended") {
+        await audioContext.resume();
+      }
+      return audioContext;
+    }
+
+    async function loadChimeBuffer(source) {
+      if (chimeBufferCache.has(source)) return chimeBufferCache.get(source);
+      const context = await ensureAudioContext();
+      const response = await fetch(source);
+      if (!response.ok) throw new Error("The selected chime could not be loaded.");
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = await context.decodeAudioData(arrayBuffer.slice(0));
+      chimeBufferCache.set(source, buffer);
+      return buffer;
     }
 
     function stopAllChimes() {
-      chimeTimers.forEach(timer => clearTimeout(timer));
-      chimeTimers.clear();
-
-      activeChimeAudios.forEach(audio => {
-        try {
-          audio.pause();
-          audio.currentTime = 0;
-        } catch (error) {
-          console.warn(error);
-        }
+      activeChimeNodes.forEach(({ source }) => {
+        try { source.stop(); } catch (error) { /* already stopped */ }
       });
-      activeChimeAudios.clear();
+      activeChimeNodes.clear();
       audioStatus.textContent = chimeToggle.checked ? "Hourly chime is enabled." : "Sound is off.";
     }
 
-    function fadeAndStopAudio(audio, tailSeconds) {
-      const fadeDuration = Math.min(0.25, Math.max(0.08, tailSeconds * 0.12));
-      const fadeStartMs = Math.max(0, (tailSeconds - fadeDuration) * 1000);
-      const fadeTimer = setTimeout(() => {
-        const steps = 8;
-        let step = 0;
-        const initialVolume = audio.volume;
-        const interval = setInterval(() => {
-          step += 1;
-          audio.volume = Math.max(0, initialVolume * (1 - step / steps));
-          if (step >= steps) {
-            clearInterval(interval);
-            audio.pause();
-            activeChimeAudios.delete(audio);
-          }
-        }, (fadeDuration * 1000) / steps);
-      }, fadeStartMs);
-      chimeTimers.add(fadeTimer);
-    }
+    function scheduleChime(buffer, startTime, tailSeconds) {
+      const source = audioContext.createBufferSource();
+      const gain = audioContext.createGain();
+      source.buffer = buffer;
+      source.connect(gain);
+      gain.connect(audioContext.destination);
 
-    function playOneChime(source, delayMs, tailSeconds) {
-      const timer = setTimeout(async () => {
-        chimeTimers.delete(timer);
-        const audio = new Audio(source);
-        audio.preload = "auto";
-        activeChimeAudios.add(audio);
+      const node = { source, gain };
+      activeChimeNodes.add(node);
+      source.addEventListener("ended", () => activeChimeNodes.delete(node), { once: true });
 
-        const cleanUp = () => activeChimeAudios.delete(audio);
-        audio.addEventListener("ended", cleanUp, { once: true });
-        audio.addEventListener("error", () => {
-          cleanUp();
-          audioStatus.textContent = "The selected chime could not be played.";
-        }, { once: true });
+      if (tailSeconds === null) {
+        gain.gain.setValueAtTime(1, startTime);
+      } else {
+        const audibleSeconds = Math.max(0.1, Math.min(tailSeconds, buffer.duration));
+        const fadeDuration = Math.min(0.25, Math.max(0.08, audibleSeconds * 0.12));
+        const fadeStart = startTime + Math.max(0, audibleSeconds - fadeDuration);
+        gain.gain.setValueAtTime(1, startTime);
+        gain.gain.setValueAtTime(1, fadeStart);
+        gain.gain.linearRampToValueAtTime(0.0001, startTime + audibleSeconds);
+        source.stop(startTime + audibleSeconds + 0.03);
+      }
 
-        try {
-          await audio.play();
-          if (tailSeconds !== null) {
-            fadeAndStopAudio(audio, tailSeconds);
-          }
-        } catch (error) {
-          cleanUp();
-          console.error(error);
-          audioStatus.textContent = "Tap Preview once to allow sound in this browser.";
-        }
-      }, delayMs);
-      chimeTimers.add(timer);
-    }
-
-    function isWestminsterSelected() {
-      return chimeSoundSelect.value.toLowerCase().includes("westminster");
+      source.start(startTime);
     }
 
     function updateChimeControlAvailability() {
@@ -1417,28 +1413,24 @@ centerCapSize.addEventListener("input",()=>{
         : "";
     }
 
-    function playSelectedChime(hour = new Date().getHours()) {
+    async function playSelectedChime(hour = new Date().getHours()) {
       stopAllChimes();
-      const source = getSelectedChimeSource();
+      const sourceUrl = getSelectedChimeSource();
       const soundName = chimeSoundSelect.options[chimeSoundSelect.selectedIndex].text;
-
-      // Westminster files already contain the complete musical sequence.
-      // Play the selected recording once and let it finish naturally.
-      if (isWestminsterSelected()) {
-        playOneChime(source, 0, null);
-        audioStatus.textContent = `Playing ${soundName} once.`;
-        return;
-      }
-
+      const context = await ensureAudioContext();
+      const buffer = await loadChimeBuffer(sourceUrl);
       const repeatCount = getRepeatCount(hour);
-      const spacingMs = Number(strikeSpacingSlider.value) * 1000;
-      const tailSeconds = Number(soundTailSlider.value);
+      const spacingSeconds = Number(strikeSpacingSlider.value);
+      const tailSeconds = isWestminsterSelected() ? null : Number(soundTailSlider.value);
+      const startTime = context.currentTime + 0.06;
 
       for (let i = 0; i < repeatCount; i += 1) {
-        playOneChime(source, i * spacingMs, tailSeconds);
+        scheduleChime(buffer, startTime + i * spacingSeconds, tailSeconds);
       }
 
-      audioStatus.textContent = `Playing ${soundName} × ${repeatCount}.`;
+      audioStatus.textContent = isWestminsterSelected()
+        ? `Playing ${soundName} once.`
+        : `Playing ${soundName} × ${repeatCount}.`;
     }
 
     function timeToMinutes(value) {
@@ -1463,12 +1455,10 @@ centerCapSize.addEventListener("input",()=>{
       if (hourKey === lastChimedHourKey) return;
 
       lastChimedHourKey = hourKey;
-      try {
-        playSelectedChime(now.getHours());
-      } catch (error) {
+      playSelectedChime(now.getHours()).catch(error => {
         console.error(error);
-        audioStatus.textContent = error.message;
-      }
+        audioStatus.textContent = "Tap Preview once to enable scheduled sound in this browser.";
+      });
     }
 
     chimeToggle.addEventListener("change", () => {
@@ -1519,7 +1509,10 @@ centerCapSize.addEventListener("input",()=>{
           return;
         }
 
-        if (customChimeUrl) URL.revokeObjectURL(customChimeUrl);
+        if (customChimeUrl) {
+          chimeBufferCache.delete(customChimeUrl);
+          URL.revokeObjectURL(customChimeUrl);
+        }
         customChimeUrl = temporaryUrl;
         customChimeName = file.name;
         customChimeOption.disabled = false;
@@ -1535,12 +1528,12 @@ centerCapSize.addEventListener("input",()=>{
       }, { once: true });
     });
 
-    testChimeButton.addEventListener("click", () => {
+    testChimeButton.addEventListener("click", async () => {
       try {
-        playSelectedChime(new Date().getHours());
+        await playSelectedChime(new Date().getHours());
       } catch (error) {
         console.error(error);
-        audioStatus.textContent = error.message;
+        audioStatus.textContent = error.message || "The selected chime could not be played.";
       }
     });
 
@@ -1555,6 +1548,7 @@ centerCapSize.addEventListener("input",()=>{
       stopAllChimes();
       if (uploadedImageUrl) URL.revokeObjectURL(uploadedImageUrl);
       if (customChimeUrl) URL.revokeObjectURL(customChimeUrl);
+      if (audioContext) audioContext.close().catch(() => {});
     });
 
     renderHands();
