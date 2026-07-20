@@ -93,6 +93,14 @@ Vintage Clock works beautifully offline after installation.
 
 https://vintageclock.net
 
+## Acknowledgements
+
+### OtoLogic
+
+Some built-in clock chimes use royalty-free sound effects provided by OtoLogic.
+
+https://otologic.jp/
+
 ---
 
 ## Support the Project
