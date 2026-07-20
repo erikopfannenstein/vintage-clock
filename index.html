@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#15110d" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Vintage Clock" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
   <title>Vintage Clock Workshop</title>
   <style>
     :root {
@@ -19,6 +25,44 @@
       --hand-highlight: #4f4337;
       --center-color: #b98a42;
       --second-color: #8d211d;
+    }
+
+
+    .app-guide-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(8px);
+    }
+
+    .app-guide-overlay.open { display: flex; }
+
+    .app-guide-card {
+      width: min(460px, 100%);
+      max-height: calc(100dvh - 40px);
+      overflow: auto;
+      padding: 24px;
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      color: var(--text);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .app-guide-card h2 { margin: 0 0 10px; font-size: 1.35rem; }
+    .app-guide-card p { margin: 8px 0; color: var(--muted); line-height: 1.5; }
+    .app-guide-steps { margin: 16px 0; padding-left: 22px; line-height: 1.65; }
+    .app-guide-note {
+      padding: 11px 12px;
+      border: 1px solid rgba(200,169,107,0.35);
+      border-radius: 10px;
+      background: rgba(200,169,107,0.09);
+      color: var(--text) !important;
     }
 
     * { box-sizing: border-box; }
@@ -113,6 +157,39 @@
       transform-origin: center;
       pointer-events: none;
       will-change: transform;
+    }
+
+
+    /* Optional numeral overlay: independent from the uploaded dial image. */
+    .number-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      color: var(--overlay-number-color, #21150d);
+      font-family: var(--overlay-number-font, Georgia, "Times New Roman", serif);
+      font-weight: 700;
+      text-shadow: 0 1px 1px rgba(255,255,255,0.45), 0 1px 3px rgba(0,0,0,0.18);
+    }
+
+    .overlay-number {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 14%;
+      height: 10%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--overlay-number-size, clamp(18px, 3.6vmin, 48px));
+      line-height: 1;
+      white-space: nowrap;
+      transform:
+        translate(-50%, -50%)
+        rotate(calc(var(--i) * 30deg))
+        translateY(calc(-1 * var(--overlay-number-radius, 360%)))
+        rotate(calc(var(--i) * -30deg));
+      transform-origin: center;
     }
 
     .numeral {
@@ -216,7 +293,7 @@
       position: absolute;
       left: 50%;
       bottom: 50%;
-      width: clamp(2px, 0.42%, 5px);
+      width: var(--second-hand-width, clamp(2px, 0.42%, 5px));
       height: var(--second-hand-length, 46%);
       transform: translateX(-50%);
       transform-origin: 50% 100%;
@@ -240,8 +317,8 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      width: clamp(2px, 0.34%, 4px);
-      height: 8%;
+      width: var(--second-hand-tail-width, clamp(2px, 0.34%, 4px));
+      height: var(--second-hand-tail-length, 8%);
       transform: translateX(-50%);
       background: var(--second-color);
       border-radius: 0 0 999px 999px;
@@ -259,6 +336,38 @@
       border-radius: 50%;
       background: transparent;
     }
+
+
+    /* Second-hand style variations */
+    .second-hand.second-style-straight .second-hand-tip,
+    .second-hand.second-style-straight .second-hand-tail::after { display: none; }
+
+    .second-hand.second-style-needle .second-hand-tip {
+      width: 230%;
+      height: 8%;
+      aspect-ratio: auto;
+      transform: translate(-50%, -18%);
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      border-radius: 0;
+    }
+    .second-hand.second-style-needle .second-hand-tail::after { display: none; }
+
+    .second-hand.second-style-diamond .second-hand-tip {
+      width: 330%;
+      transform: translate(-50%, -42%) rotate(45deg);
+      border-radius: 12%;
+    }
+
+    .second-hand.second-style-counterweight .second-hand-tip { display: none; }
+    .second-hand.second-style-counterweight .second-hand-tail::after {
+      bottom: -38%;
+      width: 560%;
+      border-width: 0;
+      background: var(--second-color);
+    }
+
+    .second-hand.second-style-minimal .second-hand-tip,
+    .second-hand.second-style-minimal .second-hand-tail { display: none; }
 
     .hand-fill {
       fill: var(--hand-color);
@@ -285,7 +394,7 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      width: calc(5% * var(--center-cap-scale,1));
+      width: 5%;
       aspect-ratio: 1;
       transform: translate(-50%, -50%);
       z-index: 12;
@@ -467,17 +576,18 @@
       min-height: 92px;
       padding: 8px;
       border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.035);
-      color: var(--text);
+      border: 1px solid rgba(78,52,25,0.34);
+      background: radial-gradient(circle, #f1e2bd 0%, #e1c991 100%);
+      color: #2b1c10;
       text-align: center;
       cursor: pointer;
+      box-shadow: inset 0 0 10px rgba(74,42,15,0.16);
     }
 
     .hand-card.selected {
-      border-color: var(--accent);
-      box-shadow: inset 0 0 0 1px var(--accent);
-      background: rgba(200,169,107,0.12);
+      border-color: #7c5b2e;
+      box-shadow: inset 0 0 0 2px #9b753e, inset 0 0 12px rgba(74,42,15,0.22);
+      background: radial-gradient(circle, #f6e9c9 0%, #e6cf98 100%);
     }
 
     .hand-card svg {
@@ -553,11 +663,27 @@
   </style>
 </head>
 <body>
+  <div id="appGuideOverlay" class="app-guide-overlay" role="dialog" aria-modal="true" aria-labelledby="appGuideTitle">
+    <div class="app-guide-card">
+      <h2 id="appGuideTitle">Use Vintage Clock Like an App</h2>
+      <p>On iPhone or iPad, add this clock to your Home Screen to hide Safari's tabs and address bar.</p>
+      <ol class="app-guide-steps">
+        <li>Open this page in <strong>Safari</strong>.</li>
+        <li>Tap the <strong>Share</strong> button.</li>
+        <li>Choose <strong>Add to Home Screen</strong>.</li>
+        <li>Turn on <strong>Open as Web App</strong>, then tap <strong>Add</strong>.</li>
+        <li>Open Vintage Clock from its new Home Screen icon.</li>
+      </ol>
+      <p class="app-guide-note">Your clock will open in its own app-style window. The iPhone status bar may still remain visible.</p>
+      <button id="closeAppGuideButton" type="button">Got It</button>
+    </div>
+  </div>
   <main class="clock-stage">
     <div class="clock-shell" aria-label="Analog clock">
       <div id="clockFace" class="clock-face">
         <div id="defaultDial" class="default-dial"></div>
         <img id="dialImage" class="dial-image" alt="Uploaded clock face" />
+        <div id="numberOverlay" class="number-overlay" aria-hidden="true"></div>
         <div id="brand" class="brand">Vintage Clock</div>
 
         <div class="hands-layer">
@@ -597,9 +723,8 @@
       <label for="imagePicker" style="margin-top:14px;">Upload Your Own Clock Face</label>
       <input id="imagePicker" type="file" accept="image/*" />
 
-      <div class="button-row" style="margin-top:8px;">
+      <div style="margin-top:8px;">
         <button id="removeImageButton" type="button">Use Default Dial</button>
-        <button id="fitButton" type="button">Toggle Image Fit</button>
       </div>
       <div id="imageStatus" class="status">Using the default Roman dial.</div>
     </section>
@@ -631,6 +756,44 @@
     </section>
 
     <section class="control-group">
+      <div class="group-title">Dial Numbers</div>
+
+      <label for="numberStyleSelect">Number Style</label>
+      <select id="numberStyleSelect">
+        <option value="none">No Numbers</option>
+        <option value="arabic">Arabic Numbers (1–12)</option>
+        <option value="roman">Roman Numerals (I–XII)</option>
+        <option value="roman-clock">Clock Roman Numerals (IIII)</option>
+        <option value="cardinal">12, 3, 6, 9 Only</option>
+      </select>
+
+      <label for="numberFontSelect" style="margin-top:12px;">Number Font</label>
+      <select id="numberFontSelect">
+        <option value='Georgia, "Times New Roman", serif'>Traditional Serif</option>
+        <option value='"Times New Roman", Times, serif'>Classic Roman</option>
+        <option value='Garamond, "Palatino Linotype", serif'>Old Style</option>
+        <option value='"Arial Narrow", Arial, sans-serif'>Clean Narrow</option>
+        <option value='Arial, Helvetica, sans-serif'>Modern Sans</option>
+      </select>
+
+      <div class="slider-row">
+        <div class="slider-header"><span>Number Size</span><span id="numberSizeValue" class="slider-value">100%</span></div>
+        <input id="numberSizeSlider" type="range" min="55" max="180" value="100" step="1" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header"><span>Distance from Center</span><span id="numberRadiusValue" class="slider-value">100%</span></div>
+        <input id="numberRadiusSlider" type="range" min="65" max="125" value="100" step="1" />
+      </div>
+
+      <label for="numberColor">Number Color</label>
+      <input id="numberColor" type="color" value="#21150d" />
+
+      <button id="resetNumbersButton" type="button" style="margin-top:8px;">Reset Dial Numbers</button>
+      <p class="instruction">Numbers stay fixed to the clock and do not move or zoom with the uploaded image.</p>
+    </section>
+
+    <section class="control-group">
       <div class="group-title">Clock Hands</div>
       <select id="handStyleSelect" aria-label="Hand style">
         <option value="classic-spade">Classic Spade</option>
@@ -650,9 +813,29 @@
         <input id="handSizeSlider" type="range" min="70" max="135" value="100" step="1" />
       </div>
 
+      <label for="secondHandStyleSelect">Second Hand Style</label>
+      <select id="secondHandStyleSelect">
+        <option value="classic">Classic Ornament</option>
+        <option value="straight">Straight</option>
+        <option value="needle">Needle Tip</option>
+        <option value="diamond">Diamond Tip</option>
+        <option value="counterweight">Counterweight</option>
+        <option value="minimal">Minimal</option>
+      </select>
+
       <div class="slider-row">
         <div class="slider-header"><span>Second Hand Length</span><span id="secondHandLengthValue" class="slider-value">100%</span></div>
         <input id="secondHandLengthSlider" type="range" min="70" max="145" value="100" step="1" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header"><span>Second Hand Width</span><span id="secondHandWidthValue" class="slider-value">100%</span></div>
+        <input id="secondHandWidthSlider" type="range" min="50" max="220" value="100" step="5" />
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-header"><span>Second Hand Tail</span><span id="secondHandTailValue" class="slider-value">100%</span></div>
+        <input id="secondHandTailSlider" type="range" min="0" max="200" value="100" step="5" />
       </div>
 
       <label class="switch-row">
@@ -675,11 +858,6 @@
         </div>
       </div>
 
-        <div style="margin-top:10px;">
-          <label for="centerCapSize">Center Cap Size <span id="centerCapSizeValue">100%</span></label>
-          <input id="centerCapSize" type="range" min="50" max="200" value="100" />
-        </div>
-
       <button id="resetHandsButton" type="button" style="margin-top:8px;">Reset Hand Style</button>
     </section>
 
@@ -690,6 +868,7 @@
         <input id="brandToggle" type="checkbox" checked />
       </label>
       <button id="fullscreenButton" type="button">Enter Fullscreen</button>
+      <div id="appModeHint" class="status-text" style="margin-top:8px;"></div>
       <button id="hideControlsButton" type="button" style="margin-top:8px;">Hide Controls</button>
     </section>
 
@@ -749,10 +928,11 @@
       <div class="slider-row">
         <div class="slider-header">
           <span>Sound Tail</span>
-          <span id="soundTailValue" class="slider-value">15.0 sec</span>
+          <span id="soundTailValue" class="slider-value">30.0 sec</span>
         </div>
-        <input id="soundTailSlider" type="range" min="0.5" max="15" value="15" step="0.1" />
+        <input id="soundTailSlider" type="range" min="0.5" max="30" value="30" step="0.1" />
         <div class="instruction">Shortens a long recording with a gentle fade. It cannot extend the original recording.</div>
+        <div id="westminsterRecommendation" class="instruction" style="display:none; margin-top:6px;">🕰 Recommended: Once / 30 sec</div>
       </div>
 
       <label for="customChimePicker" style="margin-top:12px;">Upload Custom Chime</label>
@@ -840,7 +1020,11 @@
       <div class="second-hand-tail"></div>`;
 
     const romanNumerals = ["XII","I","II","III","IV","V","VI","VII","VIII","IX","X","XI"];
+    const overlayRomanNumerals = ["XII","I","II","III","IV","V","VI","VII","VIII","IX","X","XI"];
+    const overlayClockRomanNumerals = ["XII","I","II","III","IIII","V","VI","VII","VIII","IX","X","XI"];
+    const overlayArabicNumbers = ["12","1","2","3","4","5","6","7","8","9","10","11"];
     const defaultDial = document.getElementById("defaultDial");
+    const numberOverlay = document.getElementById("numberOverlay");
 
     for (let i = 0; i < 60; i += 1) {
       const mark = document.createElement("div");
@@ -867,7 +1051,6 @@
     const imagePicker = document.getElementById("imagePicker");
     const dialImage = document.getElementById("dialImage");
     const removeImageButton = document.getElementById("removeImageButton");
-    const fitButton = document.getElementById("fitButton");
     const imageStatus = document.getElementById("imageStatus");
 
     const adjustButton = document.getElementById("adjustButton");
@@ -880,22 +1063,37 @@
     const centerImageButton = document.getElementById("centerImageButton");
     const resetImageButton = document.getElementById("resetImageButton");
 
+    const numberStyleSelect = document.getElementById("numberStyleSelect");
+    const numberFontSelect = document.getElementById("numberFontSelect");
+    const numberSizeSlider = document.getElementById("numberSizeSlider");
+    const numberSizeValue = document.getElementById("numberSizeValue");
+    const numberRadiusSlider = document.getElementById("numberRadiusSlider");
+    const numberRadiusValue = document.getElementById("numberRadiusValue");
+    const numberColor = document.getElementById("numberColor");
+    const resetNumbersButton = document.getElementById("resetNumbersButton");
+
     const handStyleSelect = document.getElementById("handStyleSelect");
     const handPreviewGrid = document.getElementById("handPreviewGrid");
     const handSizeSlider = document.getElementById("handSizeSlider");
     const handSizeValue = document.getElementById("handSizeValue");
+    const secondHandStyleSelect = document.getElementById("secondHandStyleSelect");
     const secondHandLengthSlider = document.getElementById("secondHandLengthSlider");
     const secondHandLengthValue = document.getElementById("secondHandLengthValue");
+    const secondHandWidthSlider = document.getElementById("secondHandWidthSlider");
+    const secondHandWidthValue = document.getElementById("secondHandWidthValue");
+    const secondHandTailSlider = document.getElementById("secondHandTailSlider");
+    const secondHandTailValue = document.getElementById("secondHandTailValue");
     const secondHandToggle = document.getElementById("secondHandToggle");
     const handColor = document.getElementById("handColor");
     const centerColor = document.getElementById("centerColor");
-const centerCapSize=document.getElementById("centerCapSize");
-const centerCapSizeValue=document.getElementById("centerCapSizeValue");
     const secondColor = document.getElementById("secondColor");
     const resetHandsButton = document.getElementById("resetHandsButton");
 
     const brandToggle = document.getElementById("brandToggle");
     const fullscreenButton = document.getElementById("fullscreenButton");
+    const appGuideOverlay = document.getElementById("appGuideOverlay");
+    const closeAppGuideButton = document.getElementById("closeAppGuideButton");
+    const appModeHint = document.getElementById("appModeHint");
     const hideControlsButton = document.getElementById("hideControlsButton");
     const showControlsButton = document.getElementById("showControlsButton");
 
@@ -906,6 +1104,7 @@ const centerCapSizeValue=document.getElementById("centerCapSizeValue");
     const strikeSpacingValue = document.getElementById("strikeSpacingValue");
     const soundTailSlider = document.getElementById("soundTailSlider");
     const soundTailValue = document.getElementById("soundTailValue");
+    const westminsterRecommendation = document.getElementById("westminsterRecommendation");
     const customChimePicker = document.getElementById("customChimePicker");
     const customChimeOption = document.getElementById("customChimeOption");
     const testChimeButton = document.getElementById("testChimeButton");
@@ -927,21 +1126,69 @@ const centerCapSizeValue=document.getElementById("centerCapSizeValue");
     let dragOriginX = 0;
     let dragOriginY = 0;
 
+    let numberStyle = "none";
+    let numberSize = 1;
+    let numberRadius = 1;
+
     let selectedHandStyle = "classic-spade";
     let handScale = 1;
+    let secondHandStyle = "classic";
     let secondHandLength = 1;
+    let secondHandWidth = 1;
+    let secondHandTail = 1;
     let lastChimedHourKey = "";
     let customChimeUrl = "";
     let customChimeName = "";
-    const activeChimeNodes = new Set();
-    const chimeBufferCache = new Map();
+    const activeChimeAudios = new Set();
+    const chimeTimers = new Set();
     let audioContext = null;
+
+    function renderDialNumbers() {
+      numberOverlay.innerHTML = "";
+
+      let values = [];
+      if (numberStyle === "arabic") {
+        values = overlayArabicNumbers;
+      } else if (numberStyle === "roman") {
+        values = overlayRomanNumerals;
+      } else if (numberStyle === "roman-clock") {
+        values = overlayClockRomanNumerals;
+      } else if (numberStyle === "cardinal") {
+        values = ["12", "", "", "3", "", "", "6", "", "", "9", "", ""];
+      }
+
+      values.forEach((value, index) => {
+        if (!value) return;
+        const numeral = document.createElement("div");
+        numeral.className = "overlay-number";
+        numeral.style.setProperty("--i", index);
+        numeral.textContent = value;
+        numberOverlay.appendChild(numeral);
+      });
+
+      applyDialNumberSettings();
+    }
+
+    function applyDialNumberSettings() {
+      const sizeVmin = 3.6 * numberSize;
+      const radiusPercent = 360 * numberRadius;
+      numberOverlay.style.setProperty(
+        "--overlay-number-size",
+        `clamp(14px, ${sizeVmin.toFixed(2)}vmin, 72px)`
+      );
+      numberOverlay.style.setProperty("--overlay-number-radius", `${radiusPercent}%`);
+      numberOverlay.style.setProperty("--overlay-number-color", numberColor.value);
+      numberOverlay.style.setProperty("--overlay-number-font", numberFontSelect.value);
+      numberSizeValue.textContent = `${Math.round(numberSize * 100)}%`;
+      numberRadiusValue.textContent = `${Math.round(numberRadius * 100)}%`;
+    }
 
     function renderHands() {
       const style = handStyles[selectedHandStyle];
       hourHand.innerHTML = style.hour;
       minuteHand.innerHTML = style.minute;
       secondHand.innerHTML = secondHandMarkup;
+      secondHand.className = `rotating-hand second-hand second-style-${secondHandStyle}`;
       applyHandScale();
       updateHandSelectionUI();
     }
@@ -986,10 +1233,18 @@ const centerCapSizeValue=document.getElementById("centerCapSizeValue");
 
       /* Length changes only the shaft above the center; its bottom stays anchored. */
       const secondLengthPercent = 46 * secondHandLength;
+      const secondWidthPercent = 0.42 * secondHandWidth;
+      const secondTailWidthPercent = 0.34 * secondHandWidth;
+      const secondTailPercent = 8 * secondHandTail;
       secondHand.style.setProperty("--second-hand-length", `${secondLengthPercent}%`);
+      secondHand.style.setProperty("--second-hand-width", `${secondWidthPercent}%`);
+      secondHand.style.setProperty("--second-hand-tail-width", `${secondTailWidthPercent}%`);
+      secondHand.style.setProperty("--second-hand-tail-length", `${secondTailPercent}%`);
 
       handSizeValue.textContent = `${Math.round(scale * 100)}%`;
       secondHandLengthValue.textContent = `${Math.round(secondHandLength * 100)}%`;
+      secondHandWidthValue.textContent = `${Math.round(secondHandWidth * 100)}%`;
+      secondHandTailValue.textContent = `${Math.round(secondHandTail * 100)}%`;
     }
 
     function updateClock() {
@@ -1113,14 +1368,6 @@ const centerCapSizeValue=document.getElementById("centerCapSizeValue");
 
     removeImageButton.addEventListener("click", showDefaultDial);
 
-    fitButton.addEventListener("click", () => {
-      imageFitMode = imageFitMode === "contain" ? "cover" : "contain";
-      dialImage.style.objectFit = imageFitMode;
-      imageStatus.textContent = imageFitMode === "contain"
-        ? "Image fit: show the full image."
-        : "Image fit: fill the clock face.";
-    });
-
     adjustButton.addEventListener("click", () => {
       if (!uploadedImageUrl) {
         imageStatus.textContent = "Upload a clock face image before adjusting it.";
@@ -1191,6 +1438,37 @@ const centerCapSizeValue=document.getElementById("centerCapSizeValue");
       applyImageTransform();
     }, { passive: false });
 
+    numberStyleSelect.addEventListener("change", () => {
+      numberStyle = numberStyleSelect.value;
+      renderDialNumbers();
+    });
+
+    numberFontSelect.addEventListener("change", applyDialNumberSettings);
+
+    numberSizeSlider.addEventListener("input", () => {
+      numberSize = Number(numberSizeSlider.value) / 100;
+      applyDialNumberSettings();
+    });
+
+    numberRadiusSlider.addEventListener("input", () => {
+      numberRadius = Number(numberRadiusSlider.value) / 100;
+      applyDialNumberSettings();
+    });
+
+    numberColor.addEventListener("input", applyDialNumberSettings);
+
+    resetNumbersButton.addEventListener("click", () => {
+      numberStyle = "none";
+      numberSize = 1;
+      numberRadius = 1;
+      numberStyleSelect.value = "none";
+      numberFontSelect.selectedIndex = 0;
+      numberSizeSlider.value = 100;
+      numberRadiusSlider.value = 100;
+      numberColor.value = "#21150d";
+      renderDialNumbers();
+    });
+
     handStyleSelect.addEventListener("change", () => {
       selectedHandStyle = handStyleSelect.value;
       renderHands();
@@ -1201,8 +1479,23 @@ const centerCapSizeValue=document.getElementById("centerCapSizeValue");
       applyHandScale();
     });
 
+    secondHandStyleSelect.addEventListener("change", () => {
+      secondHandStyle = secondHandStyleSelect.value;
+      renderHands();
+    });
+
     secondHandLengthSlider.addEventListener("input", () => {
       secondHandLength = Number(secondHandLengthSlider.value) / 100;
+      applyHandScale();
+    });
+
+    secondHandWidthSlider.addEventListener("input", () => {
+      secondHandWidth = Number(secondHandWidthSlider.value) / 100;
+      applyHandScale();
+    });
+
+    secondHandTailSlider.addEventListener("input", () => {
+      secondHandTail = Number(secondHandTailSlider.value) / 100;
       applyHandScale();
     });
 
@@ -1218,12 +1511,6 @@ const centerCapSizeValue=document.getElementById("centerCapSizeValue");
     centerColor.addEventListener("input", () => {
       document.documentElement.style.setProperty("--center-color", centerColor.value);
     });
-centerCapSize.addEventListener("input",()=>{
-  centerCapSizeValue.textContent=centerCapSize.value+"%";
-  document.documentElement.style.setProperty("--center-cap-scale",(centerCapSize.value/100).toString());
-  localStorage.setItem("centerCapSize",centerCapSize.value);
-});
-
 
     secondColor.addEventListener("input", () => {
       document.documentElement.style.setProperty("--second-color", secondColor.value);
@@ -1233,9 +1520,15 @@ centerCapSize.addEventListener("input",()=>{
       selectedHandStyle = "classic-spade";
       handStyleSelect.value = selectedHandStyle;
       handScale = 1;
+      secondHandStyle = "classic";
       secondHandLength = 1;
+      secondHandWidth = 1;
+      secondHandTail = 1;
       handSizeSlider.value = 100;
+      secondHandStyleSelect.value = "classic";
       secondHandLengthSlider.value = 100;
+      secondHandWidthSlider.value = 100;
+      secondHandTailSlider.value = 100;
       handColor.value = "#171411";
       centerColor.value = "#b98a42";
       secondColor.value = "#8d211d";
@@ -1244,11 +1537,7 @@ centerCapSize.addEventListener("input",()=>{
       document.documentElement.style.setProperty("--center-color", centerColor.value);
       document.documentElement.style.setProperty("--second-color", secondColor.value);
       renderHands();
-    
-  centerCapSize.value="100";
-  centerCapSizeValue.textContent="100%";
-  document.documentElement.style.setProperty("--center-cap-scale","1");
-  localStorage.removeItem("centerCapSize");});
+    });
 
     brandToggle.addEventListener("change", () => {
       brand.style.display = brandToggle.checked ? "block" : "none";
@@ -1263,7 +1552,43 @@ centerCapSize.addEventListener("input",()=>{
       document.body.classList.remove("controls-hidden");
     });
 
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+
+    function openAppGuide() {
+      appGuideOverlay.classList.add("open");
+    }
+
+    function closeAppGuide() {
+      appGuideOverlay.classList.remove("open");
+    }
+
+    closeAppGuideButton.addEventListener("click", closeAppGuide);
+    appGuideOverlay.addEventListener("click", (event) => {
+      if (event.target === appGuideOverlay) closeAppGuide();
+    });
+
+    if (isStandalone) {
+      fullscreenButton.textContent = "App Mode Active";
+      appModeHint.textContent = "Vintage Clock is already running without Safari tabs.";
+    } else if (isIOS) {
+      fullscreenButton.textContent = "Use as Full-Screen App";
+      appModeHint.textContent = "Add to Home Screen for an app-style display on iPhone or iPad.";
+    }
+
     fullscreenButton.addEventListener("click", async () => {
+      if (isStandalone) {
+        appModeHint.textContent = "App mode is already active.";
+        return;
+      }
+
+      if (isIOS || !document.documentElement.requestFullscreen) {
+        openAppGuide();
+        return;
+      }
+
       try {
         if (!document.fullscreenElement) {
           await document.documentElement.requestFullscreen();
@@ -1272,13 +1597,23 @@ centerCapSize.addEventListener("input",()=>{
         }
       } catch (error) {
         console.error(error);
-        fullscreenButton.textContent = "Fullscreen Unavailable";
+        openAppGuide();
       }
     });
 
     document.addEventListener("fullscreenchange", () => {
-      fullscreenButton.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Enter Fullscreen";
+      if (!isIOS && !isStandalone) {
+        fullscreenButton.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Enter Fullscreen";
+      }
     });
+
+    if ("serviceWorker" in navigator && location.protocol !== "file:") {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+          console.warn("Offline support could not be enabled:", error);
+        });
+      });
+    }
 
     function saveChimeSettings() {
       const settings = {
@@ -1304,7 +1639,10 @@ centerCapSize.addEventListener("input",()=>{
         }
         if (saved.repeat) repeatCountSelect.value = saved.repeat;
         if (saved.spacing) strikeSpacingSlider.value = saved.spacing;
-        if (saved.tail) soundTailSlider.value = saved.tail;
+        if (saved.tail) {
+          // Migrate the former 15-second default to the new 30-second default.
+          soundTailSlider.value = Number(saved.tail) === 15 ? 30 : saved.tail;
+        }
         if (typeof saved.quietEnabled === "boolean") quietToggle.checked = saved.quietEnabled;
         if (saved.quietStart) quietStart.value = saved.quietStart;
         if (saved.quietEnd) quietEnd.value = saved.quietEnd;
@@ -1316,6 +1654,8 @@ centerCapSize.addEventListener("input",()=>{
     function updateChimeLabels() {
       strikeSpacingValue.textContent = `${Number(strikeSpacingSlider.value).toFixed(1)} sec`;
       soundTailValue.textContent = `${Number(soundTailSlider.value).toFixed(1)} sec`;
+      const isWestminster = chimeSoundSelect.value.includes("westminster");
+      westminsterRecommendation.style.display = isWestminster ? "block" : "none";
     }
 
     function getSelectedChimeSource() {
@@ -1326,111 +1666,87 @@ centerCapSize.addEventListener("input",()=>{
       return chimeSoundSelect.value;
     }
 
-    function isWestminsterSelected() {
-      return chimeSoundSelect.value.toLowerCase().includes("westminster");
-    }
-
     function getRepeatCount(hour = new Date().getHours()) {
-      // Westminster files already contain the complete musical sequence.
-      return isWestminsterSelected()
-        ? 1
-        : repeatCountSelect.value === "hour"
-          ? (hour % 12 || 12)
-          : Number(repeatCountSelect.value);
-    }
-
-    async function ensureAudioContext() {
-      if (!audioContext) {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (!AudioContextClass) throw new Error("This browser does not support Web Audio.");
-        audioContext = new AudioContextClass();
-      }
-      if (audioContext.state === "suspended") {
-        await audioContext.resume();
-      }
-      return audioContext;
-    }
-
-    async function loadChimeBuffer(source) {
-      if (chimeBufferCache.has(source)) return chimeBufferCache.get(source);
-      const context = await ensureAudioContext();
-      const response = await fetch(source);
-      if (!response.ok) throw new Error("The selected chime could not be loaded.");
-      const arrayBuffer = await response.arrayBuffer();
-      const buffer = await context.decodeAudioData(arrayBuffer.slice(0));
-      chimeBufferCache.set(source, buffer);
-      return buffer;
+      return repeatCountSelect.value === "hour"
+        ? (hour % 12 || 12)
+        : Number(repeatCountSelect.value);
     }
 
     function stopAllChimes() {
-      activeChimeNodes.forEach(({ source }) => {
-        try { source.stop(); } catch (error) { /* already stopped */ }
+      chimeTimers.forEach(timer => clearTimeout(timer));
+      chimeTimers.clear();
+
+      activeChimeAudios.forEach(audio => {
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+        } catch (error) {
+          console.warn(error);
+        }
       });
-      activeChimeNodes.clear();
+      activeChimeAudios.clear();
       audioStatus.textContent = chimeToggle.checked ? "Hourly chime is enabled." : "Sound is off.";
     }
 
-    function scheduleChime(buffer, startTime, tailSeconds) {
-      const source = audioContext.createBufferSource();
-      const gain = audioContext.createGain();
-      source.buffer = buffer;
-      source.connect(gain);
-      gain.connect(audioContext.destination);
-
-      const node = { source, gain };
-      activeChimeNodes.add(node);
-      source.addEventListener("ended", () => activeChimeNodes.delete(node), { once: true });
-
-      if (tailSeconds === null) {
-        gain.gain.setValueAtTime(1, startTime);
-      } else {
-        const audibleSeconds = Math.max(0.1, Math.min(tailSeconds, buffer.duration));
-        const fadeDuration = Math.min(0.25, Math.max(0.08, audibleSeconds * 0.12));
-        const fadeStart = startTime + Math.max(0, audibleSeconds - fadeDuration);
-        gain.gain.setValueAtTime(1, startTime);
-        gain.gain.setValueAtTime(1, fadeStart);
-        gain.gain.linearRampToValueAtTime(0.0001, startTime + audibleSeconds);
-        source.stop(startTime + audibleSeconds + 0.03);
-      }
-
-      source.start(startTime);
+    function fadeAndStopAudio(audio, tailSeconds) {
+      const fadeDuration = Math.min(0.25, Math.max(0.08, tailSeconds * 0.12));
+      const fadeStartMs = Math.max(0, (tailSeconds - fadeDuration) * 1000);
+      const fadeTimer = setTimeout(() => {
+        const steps = 8;
+        let step = 0;
+        const initialVolume = audio.volume;
+        const interval = setInterval(() => {
+          step += 1;
+          audio.volume = Math.max(0, initialVolume * (1 - step / steps));
+          if (step >= steps) {
+            clearInterval(interval);
+            audio.pause();
+            activeChimeAudios.delete(audio);
+          }
+        }, (fadeDuration * 1000) / steps);
+      }, fadeStartMs);
+      chimeTimers.add(fadeTimer);
     }
 
-    function updateChimeControlAvailability() {
-      const westminsterSelected = isWestminsterSelected();
-      repeatCountSelect.disabled = westminsterSelected;
-      strikeSpacingSlider.disabled = westminsterSelected;
-      soundTailSlider.disabled = westminsterSelected;
+    function playOneChime(source, delayMs, tailSeconds) {
+      const timer = setTimeout(async () => {
+        chimeTimers.delete(timer);
+        const audio = new Audio(source);
+        audio.preload = "auto";
+        activeChimeAudios.add(audio);
 
-      repeatCountSelect.title = westminsterSelected
-        ? "Westminster recordings already contain the complete chime sequence."
-        : "";
-      strikeSpacingSlider.title = westminsterSelected
-        ? "Westminster plays once from beginning to end."
-        : "";
-      soundTailSlider.title = westminsterSelected
-        ? "Westminster uses the full recorded sound without an early fade-out."
-        : "";
+        const cleanUp = () => activeChimeAudios.delete(audio);
+        audio.addEventListener("ended", cleanUp, { once: true });
+        audio.addEventListener("error", () => {
+          cleanUp();
+          audioStatus.textContent = "The selected chime could not be played.";
+        }, { once: true });
+
+        try {
+          await audio.play();
+          fadeAndStopAudio(audio, tailSeconds);
+        } catch (error) {
+          cleanUp();
+          console.error(error);
+          audioStatus.textContent = "Tap Preview once to allow sound in this browser.";
+        }
+      }, delayMs);
+      chimeTimers.add(timer);
     }
 
-    async function playSelectedChime(hour = new Date().getHours()) {
+    function playSelectedChime(hour = new Date().getHours()) {
       stopAllChimes();
-      const sourceUrl = getSelectedChimeSource();
-      const soundName = chimeSoundSelect.options[chimeSoundSelect.selectedIndex].text;
-      const context = await ensureAudioContext();
-      const buffer = await loadChimeBuffer(sourceUrl);
+      const source = getSelectedChimeSource();
       const repeatCount = getRepeatCount(hour);
-      const spacingSeconds = Number(strikeSpacingSlider.value);
-      const tailSeconds = isWestminsterSelected() ? null : Number(soundTailSlider.value);
-      const startTime = context.currentTime + 0.06;
+      const spacingMs = Number(strikeSpacingSlider.value) * 1000;
+      const tailSeconds = Number(soundTailSlider.value);
 
       for (let i = 0; i < repeatCount; i += 1) {
-        scheduleChime(buffer, startTime + i * spacingSeconds, tailSeconds);
+        playOneChime(source, i * spacingMs, tailSeconds);
       }
 
-      audioStatus.textContent = isWestminsterSelected()
-        ? `Playing ${soundName} once.`
-        : `Playing ${soundName} × ${repeatCount}.`;
+      const soundName = chimeSoundSelect.options[chimeSoundSelect.selectedIndex].text;
+      audioStatus.textContent = `Playing ${soundName} × ${repeatCount}.`;
     }
 
     function timeToMinutes(value) {
@@ -1455,24 +1771,25 @@ centerCapSize.addEventListener("input",()=>{
       if (hourKey === lastChimedHourKey) return;
 
       lastChimedHourKey = hourKey;
-      playSelectedChime(now.getHours()).catch(error => {
+      try {
+        playSelectedChime(now.getHours());
+      } catch (error) {
         console.error(error);
-        audioStatus.textContent = "Tap Preview once to enable scheduled sound in this browser.";
-      });
+        audioStatus.textContent = error.message;
+      }
     }
+
+    chimeSoundSelect.addEventListener("change", () => {
+      updateChimeLabels();
+      saveChimeSettings();
+    });
 
     chimeToggle.addEventListener("change", () => {
       audioStatus.textContent = chimeToggle.checked ? "Hourly chime is enabled." : "Sound is off.";
       saveChimeSettings();
     });
 
-    chimeSoundSelect.addEventListener("change", () => {
-      stopAllChimes();
-      updateChimeControlAvailability();
-      saveChimeSettings();
-    });
-
-    [repeatCountSelect, quietToggle, quietStart, quietEnd].forEach(control => {
+    [chimeSoundSelect, repeatCountSelect, quietToggle, quietStart, quietEnd].forEach(control => {
       control.addEventListener("change", saveChimeSettings);
     });
 
@@ -1509,10 +1826,7 @@ centerCapSize.addEventListener("input",()=>{
           return;
         }
 
-        if (customChimeUrl) {
-          chimeBufferCache.delete(customChimeUrl);
-          URL.revokeObjectURL(customChimeUrl);
-        }
+        if (customChimeUrl) URL.revokeObjectURL(customChimeUrl);
         customChimeUrl = temporaryUrl;
         customChimeName = file.name;
         customChimeOption.disabled = false;
@@ -1528,12 +1842,12 @@ centerCapSize.addEventListener("input",()=>{
       }, { once: true });
     });
 
-    testChimeButton.addEventListener("click", async () => {
+    testChimeButton.addEventListener("click", () => {
       try {
-        await playSelectedChime(new Date().getHours());
+        playSelectedChime(new Date().getHours());
       } catch (error) {
         console.error(error);
-        audioStatus.textContent = error.message || "The selected chime could not be played.";
+        audioStatus.textContent = error.message;
       }
     });
 
@@ -1541,16 +1855,15 @@ centerCapSize.addEventListener("input",()=>{
 
     loadChimeSettings();
     updateChimeLabels();
-    updateChimeControlAvailability();
     audioStatus.textContent = chimeToggle.checked ? "Hourly chime is enabled." : "Sound is off.";
 
     window.addEventListener("beforeunload", () => {
       stopAllChimes();
       if (uploadedImageUrl) URL.revokeObjectURL(uploadedImageUrl);
       if (customChimeUrl) URL.revokeObjectURL(customChimeUrl);
-      if (audioContext) audioContext.close().catch(() => {});
     });
 
+    renderDialNumbers();
     renderHands();
     renderHandPreviews();
     applyImageTransform();

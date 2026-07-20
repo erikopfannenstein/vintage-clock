@@ -1,0 +1,17 @@
+{
+  "name": "Vintage Clock Workshop",
+  "short_name": "Vintage Clock",
+  "description": "Create and display a personalized vintage clock.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#15110d",
+  "theme_color": "#15110d",
+  "icons": [
+    { "src": "icons/icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
