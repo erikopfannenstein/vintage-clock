@@ -1,17 +1,18 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#15110d" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Vintage Clock" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icons/icon-180.png" />
-  <title>Vintage Clock Workshop</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta content="#15110d" name="theme-color"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="Vintage Clock" name="apple-mobile-web-app-title"/>
+<meta content="yes" name="mobile-web-app-capable"/>
+<link href="manifest.json" rel="manifest"/>
+<link href="icons/icon-180.png" rel="apple-touch-icon"/>
+<title>Vintage Clock Workshop</title>
+<style>
     :root {
       --panel: rgba(25, 19, 14, 0.97);
       --panel-border: rgba(255,255,255,0.12);
@@ -663,313 +664,282 @@
   </style>
 </head>
 <body>
-  <div id="appGuideOverlay" class="app-guide-overlay" role="dialog" aria-modal="true" aria-labelledby="appGuideTitle">
-    <div class="app-guide-card">
-      <h2 id="appGuideTitle">Use Vintage Clock Like an App</h2>
-      <p>On iPhone or iPad, add this clock to your Home Screen to hide Safari's tabs and address bar.</p>
-      <ol class="app-guide-steps">
-        <li>Open this page in <strong>Safari</strong>.</li>
-        <li>Tap the <strong>Share</strong> button.</li>
-        <li>Choose <strong>Add to Home Screen</strong>.</li>
-        <li>Turn on <strong>Open as Web App</strong>, then tap <strong>Add</strong>.</li>
-        <li>Open Vintage Clock from its new Home Screen icon.</li>
-      </ol>
-      <p class="app-guide-note">Your clock will open in its own app-style window. The iPhone status bar may still remain visible.</p>
-      <button id="closeAppGuideButton" type="button">Got It</button>
-    </div>
-  </div>
-  <main class="clock-stage">
-    <div class="clock-shell" aria-label="Analog clock">
-      <div id="clockFace" class="clock-face">
-        <div id="defaultDial" class="default-dial"></div>
-        <img id="dialImage" class="dial-image" alt="Uploaded clock face" />
-        <div id="numberOverlay" class="number-overlay" aria-hidden="true"></div>
-        <div id="brand" class="brand">Vintage Clock</div>
-
-        <div class="hands-layer">
-          <div id="hourHand" class="rotating-hand hour-hand"></div>
-          <div id="minuteHand" class="rotating-hand minute-hand"></div>
-          <div id="secondHand" class="rotating-hand second-hand"></div>
-        </div>
-
-        <div class="center-cap"></div>
-        <div class="crosshair"></div>
-      </div>
-    </div>
-  </main>
-
-  <aside class="panel">
-    <h1>Vintage Clock Workshop</h1>
-    <p class="subtitle">Restore, align, and customize a clock face directly in your browser.</p>
-
-    <section class="control-group">
-      <label for="builtInFaceSelect">Built-in Clock Faces</label>
-      <select id="builtInFaceSelect">
-        <option value="default">Default Roman Dial</option>
-        <option value="faces/classic-cream.png">Classic Cream</option>
-        <option value="faces/aged-brass.png">Aged Brass</option>
-        <option value="faces/dark-victorian.png">Dark Victorian</option>
-        <option value="faces/railway-station.png">Railway Station</option>
-        <option value="faces/art-deco.png">Art Deco (1930s)</option>
-        <option value="faces/tiffany.png">Tiffany</option>
-        <option value="faces/french-enamel.png">French Enamel</option>
-        <option value="faces/black-forest.png">Black Forest</option>
-        <option value="faces/skeleton-clock.png">Skeleton Clock</option>
-        <option value="faces/steampunk.png">Steampunk</option>
-        <option value="faces/pocket-watch.png">Pocket Watch</option>
-        <option value="faces/vienna-regulator.png">Vienna Regulator</option>
-      </select>
-
-      <label for="imagePicker" style="margin-top:14px;">Upload Your Own Clock Face</label>
-      <input id="imagePicker" type="file" accept="image/*" />
-
-      <div style="margin-top:8px;">
-        <button id="removeImageButton" type="button">Use Default Dial</button>
-      </div>
-      <div id="imageStatus" class="status">Using the default Roman dial.</div>
-    </section>
-
-    <section class="control-group">
-      <div class="group-title">Image Alignment</div>
-      <button id="adjustButton" type="button">Start Drag Adjustment</button>
-      <p class="instruction">Drag the dial with a mouse or finger and align its center hole with the red crosshair.</p>
-
-      <div class="slider-row">
-        <div class="slider-header"><span>Image Size</span><span id="zoomValue" class="slider-value">100%</span></div>
-        <input id="zoomSlider" type="range" min="40" max="220" value="100" step="1" />
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-header"><span>Move Left / Right</span><span id="xValue" class="slider-value">0</span></div>
-        <input id="xSlider" type="range" min="-300" max="300" value="0" step="1" />
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-header"><span>Move Up / Down</span><span id="yValue" class="slider-value">0</span></div>
-        <input id="ySlider" type="range" min="-300" max="300" value="0" step="1" />
-      </div>
-
-      <div class="button-row">
-        <button id="centerImageButton" type="button">Center Image</button>
-        <button id="resetImageButton" type="button">Reset All</button>
-      </div>
-    </section>
-
-    <section class="control-group">
-      <div class="group-title">Dial Numbers</div>
-
-      <label for="numberStyleSelect">Number Style</label>
-      <select id="numberStyleSelect">
-        <option value="none">No Numbers</option>
-        <option value="arabic">Arabic Numbers (1–12)</option>
-        <option value="roman">Roman Numerals (I–XII)</option>
-        <option value="roman-clock">Clock Roman Numerals (IIII)</option>
-        <option value="cardinal">12, 3, 6, 9 Only</option>
-      </select>
-
-      <label for="numberFontSelect" style="margin-top:12px;">Number Font</label>
-      <select id="numberFontSelect">
-        <option value='Georgia, "Times New Roman", serif'>Traditional Serif</option>
-        <option value='"Times New Roman", Times, serif'>Classic Roman</option>
-        <option value='Garamond, "Palatino Linotype", serif'>Old Style</option>
-        <option value='"Arial Narrow", Arial, sans-serif'>Clean Narrow</option>
-        <option value='Arial, Helvetica, sans-serif'>Modern Sans</option>
-      </select>
-
-      <div class="slider-row">
-        <div class="slider-header"><span>Number Size</span><span id="numberSizeValue" class="slider-value">100%</span></div>
-        <input id="numberSizeSlider" type="range" min="55" max="180" value="100" step="1" />
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-header"><span>Distance from Center</span><span id="numberRadiusValue" class="slider-value">100%</span></div>
-        <input id="numberRadiusSlider" type="range" min="65" max="125" value="100" step="1" />
-      </div>
-
-      <label for="numberColor">Number Color</label>
-      <input id="numberColor" type="color" value="#21150d" />
-
-      <button id="resetNumbersButton" type="button" style="margin-top:8px;">Reset Dial Numbers</button>
-      <p class="instruction">Numbers stay fixed to the clock and do not move or zoom with the uploaded image.</p>
-    </section>
-
-    <section class="control-group">
-      <div class="group-title">Clock Hands</div>
-      <select id="handStyleSelect" aria-label="Hand style">
-        <option value="classic-spade">Classic Spade</option>
-        <option value="victorian">Victorian</option>
-        <option value="gothic-fleur">Gothic Fleur</option>
-        <option value="moon-spade">Moon Spade</option>
-        <option value="modern-minimal">Modern Minimal</option>
-        <option value="slim-line">Slim Line</option>
-        <option value="tapered-modern">Tapered Modern</option>
-        <option value="bauhaus">Bauhaus</option>
-      </select>
-
-      <div id="handPreviewGrid" class="preview-grid"></div>
-
-      <div class="slider-row">
-        <div class="slider-header"><span>Hand Size</span><span id="handSizeValue" class="slider-value">100%</span></div>
-        <input id="handSizeSlider" type="range" min="70" max="135" value="100" step="1" />
-      </div>
-
-      <label for="secondHandStyleSelect">Second Hand Style</label>
-      <select id="secondHandStyleSelect">
-        <option value="classic">Classic Ornament</option>
-        <option value="straight">Straight</option>
-        <option value="needle">Needle Tip</option>
-        <option value="diamond">Diamond Tip</option>
-        <option value="counterweight">Counterweight</option>
-        <option value="minimal">Minimal</option>
-      </select>
-
-      <div class="slider-row">
-        <div class="slider-header"><span>Second Hand Length</span><span id="secondHandLengthValue" class="slider-value">100%</span></div>
-        <input id="secondHandLengthSlider" type="range" min="70" max="145" value="100" step="1" />
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-header"><span>Second Hand Width</span><span id="secondHandWidthValue" class="slider-value">100%</span></div>
-        <input id="secondHandWidthSlider" type="range" min="50" max="220" value="100" step="5" />
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-header"><span>Second Hand Tail</span><span id="secondHandTailValue" class="slider-value">100%</span></div>
-        <input id="secondHandTailSlider" type="range" min="0" max="200" value="100" step="5" />
-      </div>
-
-      <label class="switch-row">
-        <span>Show Second Hand</span>
-        <input id="secondHandToggle" type="checkbox" checked />
-      </label>
-
-      <div class="color-grid">
-        <div>
-          <label for="handColor">Hands</label>
-          <input id="handColor" type="color" value="#171411" />
-        </div>
-        <div>
-          <label for="centerColor">Center</label>
-          <input id="centerColor" type="color" value="#b98a42" />
-        </div>
-        <div>
-          <label for="secondColor">Second</label>
-          <input id="secondColor" type="color" value="#8d211d" />
-        </div>
-      </div>
-
-      <button id="resetHandsButton" type="button" style="margin-top:8px;">Reset Hand Style</button>
-    </section>
-
-    <section class="control-group">
-      <div class="group-title">Display</div>
-      <label class="switch-row">
-        <span>Show Dial Brand Text</span>
-        <input id="brandToggle" type="checkbox" checked />
-      </label>
-      <button id="fullscreenButton" type="button">Enter Fullscreen</button>
-      <div id="appModeHint" class="status-text" style="margin-top:8px;"></div>
-      <button id="hideControlsButton" type="button" style="margin-top:8px;">Hide Controls</button>
-    </section>
-
-    <section class="control-group">
-      <div class="group-title">Chime</div>
-
-      <label class="switch-row">
-        <span>Enable Hourly Chime</span>
-        <input id="chimeToggle" type="checkbox" />
-      </label>
-
-      <label for="chimeSoundSelect">Chime Sound</label>
-      <select id="chimeSoundSelect">
-        <optgroup label="Cuckoo Clock">
-          <option value="chimes/cuckoo01.mp3">Cuckoo Clock I</option>
-          <option value="chimes/cuckoo02.mp3">Cuckoo Clock II</option>
-        </optgroup>
-        <optgroup label="Grandfather Clock">
-          <option value="chimes/grandfather01.mp3">Grandfather Clock I</option>
-          <option value="chimes/grandfather02.mp3">Grandfather Clock II</option>
-          <option value="chimes/grandfather03.mp3">Grandfather Clock III</option>
-        </optgroup>
-        <optgroup label="Temple Bell">
-          <option value="chimes/temple01.mp3">Temple Bell I</option>
-          <option value="chimes/temple02.mp3">Temple Bell II</option>
-          <option value="chimes/temple03.mp3">Temple Bell III</option>
-          <option value="chimes/temple04.mp3">Temple Bell IV</option>
-        </optgroup>
-        <optgroup label="Westminster">
-          <option value="chimes/westminster01.mp3">Westminster I</option>
-          <option value="chimes/westminster02.mp3">Westminster II</option>
-          <option value="chimes/westminster03.mp3">Westminster III</option>
-          <option value="chimes/westminster04.mp3">Westminster IV</option>
-        </optgroup>
-        <optgroup label="Custom">
-          <option id="customChimeOption" value="custom" disabled>Uploaded Custom Chime</option>
-        </optgroup>
-      </select>
-
-      <label for="repeatCountSelect" style="margin-top:12px;">Repeat Count</label>
-      <select id="repeatCountSelect">
-        <option value="1">Once</option>
-        <option value="2">Twice</option>
-        <option value="4">Four Times</option>
-        <option value="hour">Current Hour</option>
-      </select>
-
-      <div class="slider-row">
-        <div class="slider-header">
-          <span>Strike Spacing</span>
-          <span id="strikeSpacingValue" class="slider-value">2.5 sec</span>
-        </div>
-        <input id="strikeSpacingSlider" type="range" min="0.5" max="8" value="2.5" step="0.1" />
-        <div class="instruction">Shorter spacing overlaps the ringing tail; longer spacing lets each strike fade.</div>
-      </div>
-
-      <div class="slider-row">
-        <div class="slider-header">
-          <span>Sound Tail</span>
-          <span id="soundTailValue" class="slider-value">30.0 sec</span>
-        </div>
-        <input id="soundTailSlider" type="range" min="0.5" max="30" value="30" step="0.1" />
-        <div class="instruction">Shortens a long recording with a gentle fade. It cannot extend the original recording.</div>
-        <div id="westminsterRecommendation" class="instruction" style="display:none; margin-top:6px;">🕰 Recommended: Once / 30 sec</div>
-      </div>
-
-      <label for="customChimePicker" style="margin-top:12px;">Upload Custom Chime</label>
-      <input id="customChimePicker" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg" />
-      <div class="instruction">Maximum duration: 15 seconds. The uploaded sound stays in this browser session.</div>
-
-      <div class="button-row" style="margin-top:10px;">
-        <button id="testChimeButton" type="button">Preview</button>
-        <button id="stopChimeButton" type="button">Stop</button>
-      </div>
-      <div id="audioStatus" class="status">Sound is off.</div>
-    </section>
-
-    <section class="control-group">
-      <div class="group-title">Quiet Hours</div>
-      <label class="switch-row">
-        <span>Enable Quiet Hours</span>
-        <input id="quietToggle" type="checkbox" checked />
-      </label>
-      <div class="quiet-grid">
-        <div>
-          <label for="quietStart">Start</label>
-          <input id="quietStart" type="time" value="22:00" />
-        </div>
-        <div>
-          <label for="quietEnd">End</label>
-          <input id="quietEnd" type="time" value="07:00" />
-        </div>
-      </div>
-    </section>
-  </aside>
-
-  <div class="floating-controls">
-    <button id="showControlsButton" type="button">Show Controls</button>
-  </div>
-
-  <script>
+<div aria-labelledby="appGuideTitle" aria-modal="true" class="app-guide-overlay" id="appGuideOverlay" role="dialog">
+<div class="app-guide-card">
+<h2 id="appGuideTitle">Use Vintage Clock Like an App</h2>
+<p id="appGuideIntro">On iPhone or iPad, add this clock to your Home Screen to hide Safari's tabs and address bar.</p>
+<ol class="app-guide-steps" id="appGuideSteps">
+<li>Open this page in <strong>Safari</strong>.</li>
+<li>Tap the <strong>Share</strong> button.</li>
+<li>Choose <strong>Add to Home Screen</strong>.</li>
+<li>Turn on <strong>Open as Web App</strong>, then tap <strong>Add</strong>.</li>
+<li>Open Vintage Clock from its new Home Screen icon.</li>
+</ol>
+<p class="app-guide-note" id="appGuideNote">Your clock will open in its own app-style window. The iPhone status bar may still remain visible.</p>
+<button id="closeAppGuideButton" type="button">Got It</button>
+</div>
+</div>
+<main class="clock-stage">
+<div aria-label="Analog clock" class="clock-shell">
+<div class="clock-face" id="clockFace">
+<div class="default-dial" id="defaultDial"></div>
+<img alt="Uploaded clock face" class="dial-image" id="dialImage"/>
+<div aria-hidden="true" class="number-overlay" id="numberOverlay"></div>
+<div class="brand" id="brand">Vintage Clock</div>
+<div class="hands-layer">
+<div class="rotating-hand hour-hand" id="hourHand"></div>
+<div class="rotating-hand minute-hand" id="minuteHand"></div>
+<div class="rotating-hand second-hand" id="secondHand"></div>
+</div>
+<div class="center-cap"></div>
+<div class="crosshair"></div>
+</div>
+</div>
+</main>
+<aside class="panel">
+<h1>Vintage Clock Workshop</h1>
+<p class="subtitle">Restore, align, and customize a clock face directly in your browser.</p><div style="margin:0 0 18px;padding:12px;border:1px solid rgba(200,169,107,.25);border-radius:10px;background:rgba(200,169,107,.08);font-size:13px;line-height:1.6;color:#f4ebdf;"><strong>Create your own beautiful vintage clock.</strong><br/>Upload an antique dial, customize elegant hands, add classic numerals, and enjoy authentic clock chimes.<br/><br/>Install Vintage Clock on your tablet, phone, or computer and transform it into a beautiful full-screen vintage clock.</div>
+<section class="control-group">
+<label for="builtInFaceSelect">Built-in Clock Faces</label>
+<select id="builtInFaceSelect">
+<option value="default">Default Roman Dial</option>
+<option value="faces/classic-cream.png">Classic Cream</option>
+<option value="faces/aged-brass.png">Aged Brass</option>
+<option value="faces/dark-victorian.png">Dark Victorian</option>
+<option value="faces/railway-station.png">Railway Station</option>
+<option value="faces/art-deco.png">Art Deco (1930s)</option>
+<option value="faces/tiffany.png">Tiffany</option>
+<option value="faces/french-enamel.png">French Enamel</option>
+<option value="faces/black-forest.png">Black Forest</option>
+<option value="faces/skeleton-clock.png">Skeleton Clock</option>
+<option value="faces/steampunk.png">Steampunk</option>
+<option value="faces/pocket-watch.png">Pocket Watch</option>
+<option value="faces/vienna-regulator.png">Vienna Regulator</option>
+</select>
+<label for="imagePicker" style="margin-top:14px;">Upload Your Own Clock Face</label>
+<input accept="image/*" id="imagePicker" type="file"/>
+<div style="margin-top:8px;">
+<button id="removeImageButton" type="button">Use Default Dial</button>
+</div>
+<div class="status" id="imageStatus">Using the default Roman dial.</div>
+</section>
+<section class="control-group">
+<div class="group-title">Image Alignment</div>
+<button id="adjustButton" type="button">Start Drag Adjustment</button>
+<p class="instruction">Drag the dial with a mouse or finger and align its center hole with the red crosshair.</p>
+<div class="slider-row">
+<div class="slider-header"><span>Image Size</span><span class="slider-value" id="zoomValue">100%</span></div>
+<input id="zoomSlider" max="220" min="40" step="1" type="range" value="100"/>
+</div>
+<div class="slider-row">
+<div class="slider-header"><span>Move Left / Right</span><span class="slider-value" id="xValue">0</span></div>
+<input id="xSlider" max="300" min="-300" step="1" type="range" value="0"/>
+</div>
+<div class="slider-row">
+<div class="slider-header"><span>Move Up / Down</span><span class="slider-value" id="yValue">0</span></div>
+<input id="ySlider" max="300" min="-300" step="1" type="range" value="0"/>
+</div>
+<div class="button-row">
+<button id="centerImageButton" type="button">Center Image</button>
+<button id="resetImageButton" type="button">Reset All</button>
+</div>
+</section>
+<section class="control-group">
+<div class="group-title">Dial Numbers</div>
+<label for="numberStyleSelect">Number Style</label>
+<select id="numberStyleSelect">
+<option value="none">No Numbers</option>
+<option value="arabic">Arabic Numbers (1–12)</option>
+<option value="roman">Roman Numerals (I–XII)</option>
+<option value="roman-clock">Clock Roman Numerals (IIII)</option>
+<option value="cardinal">12, 3, 6, 9 Only</option>
+</select>
+<label for="numberFontSelect" style="margin-top:12px;">Number Font</label>
+<select id="numberFontSelect">
+<option value='Georgia, "Times New Roman", serif'>Traditional Serif</option>
+<option value='"Times New Roman", Times, serif'>Classic Roman</option>
+<option value='Garamond, "Palatino Linotype", serif'>Old Style</option>
+<option value='"Arial Narrow", Arial, sans-serif'>Clean Narrow</option>
+<option value="Arial, Helvetica, sans-serif">Modern Sans</option>
+</select>
+<div class="slider-row">
+<div class="slider-header"><span>Number Size</span><span class="slider-value" id="numberSizeValue">100%</span></div>
+<input id="numberSizeSlider" max="180" min="55" step="1" type="range" value="100"/>
+</div>
+<div class="slider-row">
+<div class="slider-header"><span>Distance from Center</span><span class="slider-value" id="numberRadiusValue">100%</span></div>
+<input id="numberRadiusSlider" max="125" min="65" step="1" type="range" value="100"/>
+</div>
+<label for="numberColor">Number Color</label>
+<input id="numberColor" type="color" value="#21150d"/>
+<button id="resetNumbersButton" style="margin-top:8px;" type="button">Reset Dial Numbers</button>
+<p class="instruction">Numbers stay fixed to the clock and do not move or zoom with the uploaded image.</p>
+</section>
+<section class="control-group">
+<div class="group-title">Clock Hands</div>
+<select aria-label="Hand style" id="handStyleSelect">
+<option value="classic-spade">Classic Spade</option>
+<option value="victorian">Victorian</option>
+<option value="gothic-fleur">Gothic Fleur</option>
+<option value="moon-spade">Moon Spade</option>
+<option value="modern-minimal">Modern Minimal</option>
+<option value="slim-line">Slim Line</option>
+<option value="tapered-modern">Tapered Modern</option>
+<option value="bauhaus">Bauhaus</option>
+</select>
+<div class="preview-grid" id="handPreviewGrid"></div>
+<div class="slider-row">
+<div class="slider-header"><span>Hand Size</span><span class="slider-value" id="handSizeValue">100%</span></div>
+<input id="handSizeSlider" max="135" min="70" step="1" type="range" value="100"/>
+</div>
+<label for="secondHandStyleSelect">Second Hand Style</label>
+<select id="secondHandStyleSelect">
+<option value="classic">Classic Ornament</option>
+<option value="straight">Straight</option>
+<option value="needle">Needle Tip</option>
+<option value="diamond">Diamond Tip</option>
+<option value="counterweight">Counterweight</option>
+<option value="minimal">Minimal</option>
+</select>
+<div class="slider-row">
+<div class="slider-header"><span>Second Hand Length</span><span class="slider-value" id="secondHandLengthValue">100%</span></div>
+<input id="secondHandLengthSlider" max="145" min="70" step="1" type="range" value="100"/>
+</div>
+<div class="slider-row">
+<div class="slider-header"><span>Second Hand Width</span><span class="slider-value" id="secondHandWidthValue">100%</span></div>
+<input id="secondHandWidthSlider" max="220" min="50" step="5" type="range" value="100"/>
+</div>
+<div class="slider-row">
+<div class="slider-header"><span>Second Hand Tail</span><span class="slider-value" id="secondHandTailValue">100%</span></div>
+<input id="secondHandTailSlider" max="200" min="0" step="5" type="range" value="100"/>
+</div>
+<label class="switch-row">
+<span>Show Second Hand</span>
+<input checked="" id="secondHandToggle" type="checkbox"/>
+</label>
+<div class="color-grid">
+<div>
+<label for="handColor">Hands</label>
+<input id="handColor" type="color" value="#171411"/>
+</div>
+<div>
+<label for="centerColor">Center</label>
+<input id="centerColor" type="color" value="#b98a42"/>
+</div>
+<div>
+<label for="secondColor">Second</label>
+<input id="secondColor" type="color" value="#8d211d"/>
+</div>
+</div>
+<button id="resetHandsButton" style="margin-top:8px;" type="button">Reset Hand Style</button>
+</section>
+<section class="control-group">
+<div class="group-title">Display</div>
+<label class="switch-row">
+<span>Show Dial Brand Text</span>
+<input checked="" id="brandToggle" type="checkbox"/>
+</label>
+<button id="fullscreenButton" type="button">Enter Fullscreen</button>
+<div class="status-text" id="appModeHint" style="margin-top:8px;"></div>
+<button id="hideControlsButton" style="margin-top:8px;" type="button">Hide Controls</button>
+</section>
+<section class="control-group">
+<div class="group-title">Chime</div>
+<label class="switch-row">
+<span>Enable Hourly Chime</span>
+<input id="chimeToggle" type="checkbox"/>
+</label>
+<label for="chimeSoundSelect">Chime Sound</label>
+<select id="chimeSoundSelect">
+<optgroup label="Cuckoo Clock">
+<option value="chimes/cuckoo01.mp3">Cuckoo Clock I</option>
+<option value="chimes/cuckoo02.mp3">Cuckoo Clock II</option>
+</optgroup>
+<optgroup label="Grandfather Clock">
+<option value="chimes/grandfather01.mp3">Grandfather Clock I</option>
+<option value="chimes/grandfather02.mp3">Grandfather Clock II</option>
+<option value="chimes/grandfather03.mp3">Grandfather Clock III</option>
+</optgroup>
+<optgroup label="Temple Bell">
+<option value="chimes/temple01.mp3">Temple Bell I</option>
+<option value="chimes/temple02.mp3">Temple Bell II</option>
+<option value="chimes/temple03.mp3">Temple Bell III</option>
+<option value="chimes/temple04.mp3">Temple Bell IV</option>
+</optgroup>
+<optgroup label="Westminster">
+<option value="chimes/westminster01.mp3">Westminster I</option>
+<option value="chimes/westminster02.mp3">Westminster II</option>
+<option value="chimes/westminster03.mp3">Westminster III</option>
+<option value="chimes/westminster04.mp3">Westminster IV</option>
+</optgroup>
+<optgroup label="Custom">
+<option disabled="" id="customChimeOption" value="custom">Uploaded Custom Chime</option>
+</optgroup>
+</select>
+<label for="repeatCountSelect" style="margin-top:12px;">Repeat Count</label>
+<select id="repeatCountSelect">
+<option value="1">Once</option>
+<option value="2">Twice</option>
+<option value="4">Four Times</option>
+<option value="hour">Current Hour</option>
+</select>
+<div class="slider-row">
+<div class="slider-header">
+<span>Strike Spacing</span>
+<span class="slider-value" id="strikeSpacingValue">2.5 sec</span>
+</div>
+<input id="strikeSpacingSlider" max="8" min="0.5" step="0.1" type="range" value="2.5"/>
+<div class="instruction">Shorter spacing overlaps the ringing tail; longer spacing lets each strike fade.</div>
+</div>
+<div class="slider-row">
+<div class="slider-header">
+<span>Sound Tail</span>
+<span class="slider-value" id="soundTailValue">30.0 sec</span>
+</div>
+<input id="soundTailSlider" max="30" min="0.5" step="0.1" type="range" value="30"/>
+<div class="instruction">Shortens a long recording with a gentle fade. It cannot extend the original recording.</div>
+<div class="instruction" id="westminsterRecommendation" style="display:none; margin-top:6px;">🕰 Recommended: Once / 30 sec</div>
+</div>
+<label for="customChimePicker" style="margin-top:12px;">Upload Custom Chime</label>
+<input accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg" id="customChimePicker" type="file"/>
+<div class="instruction">Maximum duration: 15 seconds. The uploaded sound stays in this browser session.</div>
+<div class="button-row" style="margin-top:10px;">
+<button id="testChimeButton" type="button">Preview</button>
+<button id="stopChimeButton" type="button">Stop</button>
+</div>
+<div class="status" id="audioStatus">Sound is off.</div>
+</section>
+<section class="control-group">
+<div class="group-title">Quiet Hours</div>
+<label class="switch-row">
+<span>Enable Quiet Hours</span>
+<input checked="" id="quietToggle" type="checkbox"/>
+</label>
+<div class="quiet-grid">
+<div>
+<label for="quietStart">Start</label>
+<input id="quietStart" type="time" value="22:00"/>
+</div>
+<div>
+<label for="quietEnd">End</label>
+<input id="quietEnd" type="time" value="07:00"/>
+</div>
+</div>
+</section>
+<section class="control-group">
+<div style="text-align:center;line-height:1.7;font-size:13px;">
+<p style="font-size:18px;">❤️</p>
+<p><strong>Made with love for antique clock lovers.</strong></p>
+<p>If Vintage Clock brings a little joy to your home,<br/>please consider supporting future development.</p>
+<p><a href="https://buymeacoffee.com/vintageclock" style="display:inline-block;padding:10px 18px;background:#6f4e37;color:white;text-decoration:none;border-radius:999px;font-weight:bold;" target="_blank">☕ Buy Me a Coffee</a></p>
+<p style="color:#c8b9a8;">Thank you for helping keep this project alive.</p>
+<p style="font-size:11px;color:#9f927f;">Clock chime sounds include royalty-free audio by <a href="https://otologic.jp/" target="_blank">OtoLogic</a>.</p>
+</div>
+</section></aside>
+<div class="floating-controls">
+<button id="showControlsButton" type="button">Show Controls</button>
+</div>
+<script>
     "use strict";
 
     const handStyles = {
@@ -1094,6 +1064,9 @@
     const appGuideOverlay = document.getElementById("appGuideOverlay");
     const closeAppGuideButton = document.getElementById("closeAppGuideButton");
     const appModeHint = document.getElementById("appModeHint");
+    const appGuideIntro = document.getElementById("appGuideIntro");
+    const appGuideSteps = document.getElementById("appGuideSteps");
+    const appGuideNote = document.getElementById("appGuideNote");
     const hideControlsButton = document.getElementById("hideControlsButton");
     const showControlsButton = document.getElementById("showControlsButton");
 
@@ -1554,15 +1527,46 @@
 
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches ||
       window.navigator.standalone === true;
+    let deferredInstallPrompt = null;
+
+    function setIOSGuide() {
+      appGuideIntro.textContent = "On iPhone or iPad, add this clock to your Home Screen to hide Safari's tabs and address bar.";
+      appGuideSteps.innerHTML = `
+        <li>Open this page in <strong>Safari</strong>.</li>
+        <li>Tap the <strong>Share</strong> button.</li>
+        <li>Choose <strong>Add to Home Screen</strong>.</li>
+        <li>Turn on <strong>Open as Web App</strong>, then tap <strong>Add</strong>.</li>
+        <li>Open Vintage Clock from its new Home Screen icon.</li>`;
+      appGuideNote.textContent = "Your clock will open in its own app-style window. The iPhone status bar may still remain visible.";
+    }
+
+    function setAndroidGuide() {
+      appGuideIntro.textContent = "Install Vintage Clock from Chrome to open it without browser tabs or an address bar.";
+      appGuideSteps.innerHTML = `
+        <li>Open this page in <strong>Chrome</strong>.</li>
+        <li>Tap Chrome's <strong>menu (⋮)</strong>.</li>
+        <li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>
+        <li>Confirm the installation.</li>
+        <li>Open Vintage Clock from its new app icon.</li>`;
+      appGuideNote.textContent = "Once installed, Vintage Clock opens in its own app-style window and can use its offline cache.";
+    }
 
     function openAppGuide() {
+      if (isAndroid) setAndroidGuide();
+      else setIOSGuide();
       appGuideOverlay.classList.add("open");
     }
 
     function closeAppGuide() {
       appGuideOverlay.classList.remove("open");
+    }
+
+    function hideInstallButtonWhenInstalled() {
+      fullscreenButton.hidden = true;
+      appModeHint.hidden = true;
     }
 
     closeAppGuideButton.addEventListener("click", closeAppGuide);
@@ -1571,20 +1575,52 @@
     });
 
     if (isStandalone) {
-      fullscreenButton.textContent = "App Mode Active";
-      appModeHint.textContent = "Vintage Clock is already running without Safari tabs.";
+      hideInstallButtonWhenInstalled();
     } else if (isIOS) {
       fullscreenButton.textContent = "Use as Full-Screen App";
       appModeHint.textContent = "Add to Home Screen for an app-style display on iPhone or iPad.";
+    } else if (isAndroid) {
+      fullscreenButton.textContent = "Install Vintage Clock";
+      appModeHint.textContent = "Install from Chrome for an app-style, full-screen display.";
     }
 
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      if (!isStandalone) {
+        fullscreenButton.hidden = false;
+        if (isAndroid) fullscreenButton.textContent = "Install Vintage Clock";
+      }
+    });
+
+    window.addEventListener("appinstalled", () => {
+      deferredInstallPrompt = null;
+      hideInstallButtonWhenInstalled();
+    });
+
     fullscreenButton.addEventListener("click", async () => {
-      if (isStandalone) {
-        appModeHint.textContent = "App mode is already active.";
+      if (isIOS) {
+        openAppGuide();
         return;
       }
 
-      if (isIOS || !document.documentElement.requestFullscreen) {
+      if (isAndroid) {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const choice = await deferredInstallPrompt.userChoice;
+          deferredInstallPrompt = null;
+          if (choice.outcome === "accepted") {
+            appModeHint.textContent = "Installation started.";
+          } else {
+            appModeHint.textContent = "Installation was cancelled. You can try again from Chrome's menu.";
+          }
+        } else {
+          openAppGuide();
+        }
+        return;
+      }
+
+      if (!document.documentElement.requestFullscreen) {
         openAppGuide();
         return;
       }
@@ -1602,7 +1638,7 @@
     });
 
     document.addEventListener("fullscreenchange", () => {
-      if (!isIOS && !isStandalone) {
+      if (!isIOS && !isAndroid && !isStandalone) {
         fullscreenButton.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Enter Fullscreen";
       }
     });
