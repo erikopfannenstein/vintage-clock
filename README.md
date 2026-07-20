@@ -95,11 +95,13 @@ https://vintageclock.net
 
 ## Acknowledgements
 
-### OtoLogic
-
-Some built-in clock chimes use royalty-free sound effects provided by OtoLogic.
+Some built-in clock chime sounds are royalty-free audio provided by **OtoLogic**.
 
 https://otologic.jp/
+
+These audio files are provided under the OtoLogic license and are **not covered by the MIT License**.
+
+Thank you to OtoLogic for providing high-quality sound resources.
 
 ---
 
