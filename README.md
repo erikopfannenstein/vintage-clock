@@ -1,183 +1,124 @@
+<p align="center">
+  <img src="docs/banner.jpg" width="100%">
+</p>
+
 # Vintage Clock
 
-**Bring your favorite antique clock back to life.**
+Bring timeless clocks back to life.
+Vintage Clock lets you create a beautiful vintage clock using your own antique dial images, elegant hands, classic numerals, and authentic clock chimes.
 
-Turn your tablet, monitor, or computer into a beautiful vintage clock with authentic clock faces and customizable chimes.
+Turn an old tablet, phone, or computer into a full-screen vintage clock that feels right at home.
 
-Vintage Clock is a free, open-source web application that recreates the look and sound of antique clocks. Upload your own clock face, choose a hand style, customize colors and sizes, and enjoy realistic chimes directly in your browser.
+🌐 **Website**
+
+https://vintageclock.net
+
+---
 
 ## Features
 
-### Clock Faces
+✔ Upload your own antique clock dial
 
-- Upload your own clock face image
-- 13 built-in vintage clock faces
-- Drag, zoom, and reposition the dial
-- Full-screen display
-- Touch support
+✔ Built-in vintage clock faces
 
-### Clock Hands
+✔ Roman or Arabic numerals
 
-- Multiple SVG hand styles
-- Adjustable hand size
-- Custom hand colors
-- Optional second hand
-- Adjustable center cap color
-- Adjustable center cap size
+✔ Adjustable numeral size, color and position
 
-### Chimes
+✔ Multiple hand styles
 
-- Westminster chimes
-- Grandfather clock strikes
-- Temple bell chimes
-- Cuckoo sounds
-- Custom chime upload
-- Preview and Stop controls
-- Strike patterns:
-  - Once
-  - Twice
-  - Four Times
-  - Current Hour
-- Adjustable strike spacing
-- Adjustable sound tail for individual strikes
-- Quiet Hours
+✔ Westminster chimes
 
-Westminster recordings play once and continue to the end without being repeated or cut short.
+✔ Custom chime upload
 
-### Display Options
+✔ Full-screen clock display
 
-- Hide controls
-- Hide branding
-- Responsive layout
-- Works on desktop, tablet, and mobile browsers
+✔ Install as an app (PWA)
 
-## Built-in Clock Faces
+✔ Works offline after installation
 
-- Default Roman
-- Classic Cream
-- Aged Brass
-- Dark Victorian
-- Railway Station
-- Art Deco
-- Tiffany
-- French Enamel
-- Black Forest
-- Skeleton Clock
-- Steampunk
-- Pocket Watch
-- Vienna Regulator
+✔ Supports:
 
-## Use Online
+- iPhone & iPad
+- Android
+- Windows
+- macOS
 
-Open Vintage Clock in your browser:
+---
 
-https://erikopfannenstein.github.io/vintage-clock/
+## Perfect for
 
-No installation is required.
+- Antique clock collectors
+- Grandfather clocks
+- Mantel clocks
+- Railway clocks
+- Pocket watch lovers
+- Clock restoration projects
+- Vintage home décor
+- Turning an old tablet into a beautiful wall clock
 
-## Local Installation
+---
 
-1. Download or clone this repository.
+## Why Vintage Clock?
 
-```bash
-git clone https://github.com/erikopfannenstein/vintage-clock.git
-```
+Most clock apps simply display the current time.
 
-2. Open `index.html` in a modern web browser.
+Vintage Clock was created to preserve the beauty and character of antique clocks.
 
-## Project Structure
+Whether you're restoring a family heirloom, recreating an old clock dial, or designing your own unique timepiece, Vintage Clock helps bring timeless stories back to life.
 
-```text
-vintage-clock/
-├── index.html
-├── README.md
-├── faces/
-│   ├── classic-cream.png
-│   ├── aged-brass.png
-│   ├── dark-victorian.png
-│   ├── railway-station.png
-│   ├── art-deco.png
-│   ├── tiffany.png
-│   ├── french-enamel.png
-│   ├── black-forest.png
-│   ├── skeleton-clock.png
-│   ├── steampunk.png
-│   ├── pocket-watch.png
-│   └── vienna-regulator.png
-└── chimes/
-    ├── cuckoo01.mp3
-    ├── cuckoo02.mp3
-    ├── grandfather01.mp3
-    ├── grandfather02.mp3
-    ├── grandfather03.mp3
-    ├── temple01.mp3
-    ├── temple02.mp3
-    ├── temple03.mp3
-    ├── temple04.mp3
-    ├── westminster01.mp3
-    ├── westminster02.mp3
-    ├── westminster03.mp3
-    └── westminster04.mp3
-```
+---
 
-## Custom Clock Faces
+## Install as an App
 
-You can upload your own clock face image from the control panel.
+### iPhone / iPad
 
-For best results:
+Open Vintage Clock in Safari.
 
-- Use a square image
-- Use a high-resolution image, preferably 1500 × 1500 pixels or larger
-- Center the dial in the image
-- Leave enough space around the numerals for the clock hands
+Tap **Share** → **Add to Home Screen**.
 
-The uploaded image can be moved and resized inside the clock.
+Launch it from your Home Screen for an app-like experience.
 
-## Custom Chimes
+### Android
 
-You can upload your own chime recording and use it with the same strike controls as the built-in sounds.
+Open the website in Chrome.
 
-Supported browser-compatible audio formats may include:
+Tap **Install App** (or **Add to Home Screen**) when prompted.
 
-- MP3
-- WAV
-- OGG
+Vintage Clock works beautifully offline after installation.
 
-Custom recordings must be no longer than 15 seconds.
+---
 
-## Browser Compatibility
+## Live Demo
 
-Vintage Clock is designed for current versions of:
+https://vintageclock.net
 
-- Google Chrome
-- Microsoft Edge
-- Mozilla Firefox
-- Apple Safari
+---
 
-Browser audio restrictions may require you to interact with the page before scheduled chimes can play.
+## Support the Project
 
-## GitHub Pages
+Vintage Clock is completely free.
 
-To publish your own copy:
+If it has brought a little warmth to your home, please consider supporting future development.
 
-1. Upload the project files to a GitHub repository.
-2. Open the repository's **Settings**.
-3. Select **Pages**.
-4. Choose the `main` branch as the publishing source.
-5. Save the settings.
-6. Wait for GitHub Pages to finish publishing.
+☕ Buy Me a Coffee
 
-After updating files, refresh the published page. A hard refresh may be needed:
+https://buymeacoffee.com/vintageclock
 
-- Windows: `Ctrl + F5`
-- Mac: `Command + Shift + R`
+Every contribution helps keep Vintage Clock ticking.
+
+❤️ Thank you for supporting independent development.
+
+---
 
 ## License
 
-This project is open source. Add the license file of your choice before distributing modified versions.
+MIT License
 
-## About
+---
 
-Vintage Clock was created for people who want to preserve and enjoy the beauty of antique clocks using modern displays.
+## Made with ❤️ for antique clock lovers.
 
-A tablet placed inside an old clock case can become a working dial again—complete with adjustable hands, authentic clock faces, and traditional chimes.
+Every antique clock has a story.
+
+Thank you for helping keep those stories alive.
