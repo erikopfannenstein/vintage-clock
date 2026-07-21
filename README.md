@@ -15,6 +15,14 @@ https://vintageclock.net
 
 ---
 
+## Privacy First
+
+- No account required
+- No password
+- No tracking
+- Your clocks stay on your own device
+- Images and sounds are never uploaded to our server
+
 ## Features
 
 ✔ Upload your own antique clock dial
