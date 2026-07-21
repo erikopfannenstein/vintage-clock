@@ -902,7 +902,7 @@
 </div>
 <label for="customChimePicker" style="margin-top:12px;">Upload Custom Chime</label>
 <input accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg" id="customChimePicker" type="file"/>
-<div class="instruction">Maximum duration: 15 seconds. The uploaded sound is stored locally on this device.</div>
+<div class="instruction">Maximum duration: 15 seconds. The uploaded sound stays in this browser session.</div>
 <div class="button-row" style="margin-top:10px;">
 <button id="testChimeButton" type="button">Preview</button>
 <button id="stopChimeButton" type="button">Stop</button>
@@ -925,15 +925,6 @@
 <input id="quietEnd" type="time" value="07:00"/>
 </div>
 </div>
-</section>
-<section class="control-group" id="saveClockSection">
-<div class="group-title">My Clock</div>
-<div class="button-row">
-<button id="saveClockButton" type="button">Save My Clock</button>
-<button id="resetDefaultButton" type="button">Reset to Default</button>
-</div>
-<div class="status" id="saveClockStatus">Changes are saved automatically on this device.</div>
-<p class="instruction" style="margin-top:10px;">Your uploaded clock images and sounds are stored locally on your device and are not uploaded to a server.</p>
 </section>
 <section class="control-group">
 <div style="text-align:center;line-height:1.7;font-size:13px;">
@@ -1095,9 +1086,6 @@
     const quietToggle = document.getElementById("quietToggle");
     const quietStart = document.getElementById("quietStart");
     const quietEnd = document.getElementById("quietEnd");
-    const saveClockButton = document.getElementById("saveClockButton");
-    const resetDefaultButton = document.getElementById("resetDefaultButton");
-    const saveClockStatus = document.getElementById("saveClockStatus");
 
     let uploadedImageUrl = "";
     let imageFitMode = "contain";
@@ -1124,17 +1112,6 @@
     let lastChimedHourKey = "";
     let customChimeUrl = "";
     let customChimeName = "";
-    let currentImageKind = "default";
-    let currentImagePath = "";
-    let currentImageName = "";
-    let currentImageBlob = null;
-    let currentChimeBlob = null;
-    let isRestoringClock = false;
-    let autoSaveTimer = null;
-    const CLOCK_SETTINGS_KEY = "vintageClockSavedClockV1";
-    const CLOCK_DB_NAME = "VintageClockStorage";
-    const CLOCK_DB_VERSION = 1;
-    const CLOCK_MEDIA_STORE = "media";
     const activeChimeAudios = new Set();
     const chimeTimers = new Set();
     let audioContext = null;
@@ -1298,10 +1275,6 @@
       dialImage.style.display = "none";
       imagePicker.value = "";
       builtInFaceSelect.value = "default";
-      currentImageKind = "default";
-      currentImagePath = "";
-      currentImageName = "";
-      currentImageBlob = null;
       resetImageTransform();
       imageStatus.textContent = "Using the default Roman dial.";
     }
@@ -1314,10 +1287,6 @@
 
       stopAdjustment();
       imagePicker.value = "";
-      currentImageKind = "built-in";
-      currentImagePath = path;
-      currentImageName = label;
-      currentImageBlob = null;
       resetImageTransform();
 
       dialImage.onload = () => {
@@ -1358,10 +1327,6 @@
       if (uploadedImageUrl) URL.revokeObjectURL(uploadedImageUrl);
 
       builtInFaceSelect.value = "default";
-      currentImageKind = "uploaded";
-      currentImagePath = "";
-      currentImageName = file.name;
-      currentImageBlob = file;
       uploadedImageUrl = URL.createObjectURL(file);
       dialImage.onload = () => {
         resetImageTransform();
@@ -1686,286 +1651,6 @@
       });
     }
 
-    function openClockDatabase() {
-      return new Promise((resolve, reject) => {
-        if (!("indexedDB" in window)) {
-          reject(new Error("IndexedDB is not available in this browser."));
-          return;
-        }
-        const request = indexedDB.open(CLOCK_DB_NAME, CLOCK_DB_VERSION);
-        request.onupgradeneeded = () => {
-          const db = request.result;
-          if (!db.objectStoreNames.contains(CLOCK_MEDIA_STORE)) {
-            db.createObjectStore(CLOCK_MEDIA_STORE);
-          }
-        };
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error || new Error("Could not open local storage."));
-      });
-    }
-
-    async function putClockMedia(key, blob) {
-      const db = await openClockDatabase();
-      try {
-        await new Promise((resolve, reject) => {
-          const transaction = db.transaction(CLOCK_MEDIA_STORE, "readwrite");
-          transaction.objectStore(CLOCK_MEDIA_STORE).put(blob, key);
-          transaction.oncomplete = () => resolve();
-          transaction.onerror = () => reject(transaction.error);
-          transaction.onabort = () => reject(transaction.error || new Error("Storage was interrupted."));
-        });
-      } finally {
-        db.close();
-      }
-    }
-
-    async function getClockMedia(key) {
-      const db = await openClockDatabase();
-      try {
-        return await new Promise((resolve, reject) => {
-          const transaction = db.transaction(CLOCK_MEDIA_STORE, "readonly");
-          const request = transaction.objectStore(CLOCK_MEDIA_STORE).get(key);
-          request.onsuccess = () => resolve(request.result || null);
-          request.onerror = () => reject(request.error);
-        });
-      } finally {
-        db.close();
-      }
-    }
-
-    async function deleteClockMedia(key) {
-      const db = await openClockDatabase();
-      try {
-        await new Promise((resolve, reject) => {
-          const transaction = db.transaction(CLOCK_MEDIA_STORE, "readwrite");
-          transaction.objectStore(CLOCK_MEDIA_STORE).delete(key);
-          transaction.oncomplete = () => resolve();
-          transaction.onerror = () => reject(transaction.error);
-        });
-      } finally {
-        db.close();
-      }
-    }
-
-    function collectClockSettings() {
-      return {
-        version: 1,
-        savedAt: new Date().toISOString(),
-        image: {
-          kind: currentImageKind,
-          path: currentImagePath,
-          name: currentImageName,
-          zoom: imageZoom,
-          x: imageX,
-          y: imageY,
-          fit: imageFitMode
-        },
-        numbers: {
-          style: numberStyle,
-          font: numberFontSelect.value,
-          size: numberSize,
-          radius: numberRadius,
-          color: numberColor.value
-        },
-        hands: {
-          style: selectedHandStyle,
-          scale: handScale,
-          secondStyle: secondHandStyle,
-          secondLength: secondHandLength,
-          secondWidth: secondHandWidth,
-          secondTail: secondHandTail,
-          showSecond: secondHandToggle.checked,
-          handColor: handColor.value,
-          centerColor: centerColor.value,
-          secondColor: secondColor.value
-        },
-        display: {
-          showBrand: brandToggle.checked
-        },
-        chime: {
-          enabled: chimeToggle.checked,
-          sound: chimeSoundSelect.value,
-          repeat: repeatCountSelect.value,
-          spacing: strikeSpacingSlider.value,
-          tail: soundTailSlider.value,
-          quietEnabled: quietToggle.checked,
-          quietStart: quietStart.value,
-          quietEnd: quietEnd.value,
-          customName: customChimeName
-        }
-      };
-    }
-
-    async function saveCompleteClock(showConfirmation = false) {
-      if (isRestoringClock) return;
-      try {
-        const settings = collectClockSettings();
-        localStorage.setItem(CLOCK_SETTINGS_KEY, JSON.stringify(settings));
-
-        if (currentImageKind === "uploaded" && currentImageBlob) {
-          await putClockMedia("dialImage", currentImageBlob);
-        } else {
-          await deleteClockMedia("dialImage").catch(() => {});
-        }
-
-        if (chimeSoundSelect.value === "custom" && currentChimeBlob) {
-          await putClockMedia("customChime", currentChimeBlob);
-        } else if (chimeSoundSelect.value !== "custom") {
-          await deleteClockMedia("customChime").catch(() => {});
-        }
-
-        saveClockStatus.textContent = showConfirmation
-          ? "Your clock has been saved on this device. ✓"
-          : "All changes saved automatically. ✓";
-      } catch (error) {
-        console.error("Could not save the clock.", error);
-        saveClockStatus.textContent = "This browser could not save all clock data. Please check available storage.";
-      }
-    }
-
-    function scheduleClockSave() {
-      if (isRestoringClock) return;
-      clearTimeout(autoSaveTimer);
-      saveClockStatus.textContent = "Saving changes…";
-      autoSaveTimer = setTimeout(() => saveCompleteClock(false), 450);
-    }
-
-    function applyRestoredClockSettings(saved) {
-      const numbers = saved.numbers || {};
-      numberStyle = numbers.style || "none";
-      numberStyleSelect.value = numberStyle;
-      if (numbers.font && [...numberFontSelect.options].some(option => option.value === numbers.font)) {
-        numberFontSelect.value = numbers.font;
-      }
-      numberSize = Number(numbers.size) || 1;
-      numberRadius = Number(numbers.radius) || 1;
-      numberSizeSlider.value = Math.round(numberSize * 100);
-      numberRadiusSlider.value = Math.round(numberRadius * 100);
-      if (numbers.color) numberColor.value = numbers.color;
-      renderDialNumbers();
-
-      const hands = saved.hands || {};
-      selectedHandStyle = handStyles[hands.style] ? hands.style : "classic-spade";
-      handStyleSelect.value = selectedHandStyle;
-      handScale = Number(hands.scale) || 1;
-      secondHandStyle = hands.secondStyle || "classic";
-      secondHandLength = Number(hands.secondLength) || 1;
-      secondHandWidth = Number(hands.secondWidth) || 1;
-      secondHandTail = Number.isFinite(Number(hands.secondTail)) ? Number(hands.secondTail) : 1;
-      handSizeSlider.value = Math.round(handScale * 100);
-      secondHandStyleSelect.value = secondHandStyle;
-      secondHandLengthSlider.value = Math.round(secondHandLength * 100);
-      secondHandWidthSlider.value = Math.round(secondHandWidth * 100);
-      secondHandTailSlider.value = Math.round(secondHandTail * 100);
-      secondHandToggle.checked = hands.showSecond !== false;
-      handColor.value = hands.handColor || "#171411";
-      centerColor.value = hands.centerColor || "#b98a42";
-      secondColor.value = hands.secondColor || "#8d211d";
-      document.documentElement.style.setProperty("--hand-color", handColor.value);
-      document.documentElement.style.setProperty("--hand-highlight", handColor.value);
-      document.documentElement.style.setProperty("--center-color", centerColor.value);
-      document.documentElement.style.setProperty("--second-color", secondColor.value);
-      renderHands();
-      secondHand.style.display = secondHandToggle.checked ? "block" : "none";
-
-      brandToggle.checked = !saved.display || saved.display.showBrand !== false;
-      brand.style.display = brandToggle.checked ? "block" : "none";
-
-      const chime = saved.chime || {};
-      chimeToggle.checked = Boolean(chime.enabled);
-      if (chime.repeat) repeatCountSelect.value = chime.repeat;
-      if (chime.spacing) strikeSpacingSlider.value = chime.spacing;
-      if (chime.tail) soundTailSlider.value = chime.tail;
-      if (typeof chime.quietEnabled === "boolean") quietToggle.checked = chime.quietEnabled;
-      if (chime.quietStart) quietStart.value = chime.quietStart;
-      if (chime.quietEnd) quietEnd.value = chime.quietEnd;
-      updateChimeLabels();
-      audioStatus.textContent = chimeToggle.checked ? "Hourly chime is enabled." : "Sound is off.";
-    }
-
-    async function restoreSavedClock() {
-      const raw = localStorage.getItem(CLOCK_SETTINGS_KEY);
-      if (!raw) {
-        saveClockStatus.textContent = "Changes are saved automatically on this device.";
-        return false;
-      }
-
-      isRestoringClock = true;
-      try {
-        const saved = JSON.parse(raw);
-        applyRestoredClockSettings(saved);
-
-        const image = saved.image || {};
-        if (image.kind === "uploaded") {
-          const blob = await getClockMedia("dialImage");
-          if (blob) {
-            if (uploadedImageUrl) URL.revokeObjectURL(uploadedImageUrl);
-            currentImageBlob = blob;
-            currentImageKind = "uploaded";
-            currentImageName = image.name || "Saved clock face";
-            uploadedImageUrl = URL.createObjectURL(blob);
-            builtInFaceSelect.value = "default";
-            dialImage.src = uploadedImageUrl;
-            dialImage.style.display = "block";
-            imageStatus.textContent = `Restored: ${currentImageName}`;
-          } else {
-            showDefaultDial();
-          }
-        } else if (image.kind === "built-in" && image.path) {
-          loadBuiltInFace(image.path, image.name || "Saved face");
-          builtInFaceSelect.value = image.path;
-        } else {
-          showDefaultDial();
-        }
-
-        imageZoom = Number(image.zoom) || 1;
-        imageX = Number(image.x) || 0;
-        imageY = Number(image.y) || 0;
-        imageFitMode = image.fit || "contain";
-        dialImage.style.objectFit = imageFitMode;
-        applyImageTransform();
-
-        const chime = saved.chime || {};
-        if (chime.sound === "custom") {
-          const blob = await getClockMedia("customChime");
-          if (blob) {
-            if (customChimeUrl) URL.revokeObjectURL(customChimeUrl);
-            currentChimeBlob = blob;
-            customChimeName = chime.customName || "Saved custom chime";
-            customChimeUrl = URL.createObjectURL(blob);
-            customChimeOption.disabled = false;
-            customChimeOption.textContent = `Custom: ${customChimeName}`;
-            chimeSoundSelect.value = "custom";
-          }
-        } else if (chime.sound && [...chimeSoundSelect.options].some(option => option.value === chime.sound)) {
-          chimeSoundSelect.value = chime.sound;
-        }
-        updateChimeLabels();
-        saveClockStatus.textContent = "Your saved clock was restored automatically. ✓";
-        return true;
-      } catch (error) {
-        console.error("Could not restore the saved clock.", error);
-        saveClockStatus.textContent = "The saved clock could not be restored.";
-        return false;
-      } finally {
-        isRestoringClock = false;
-      }
-    }
-
-    async function resetClockToDefault() {
-      const confirmed = window.confirm("Reset the clock and remove the locally saved image, sound, and settings from this device?");
-      if (!confirmed) return;
-      clearTimeout(autoSaveTimer);
-      stopAllChimes();
-      localStorage.removeItem(CLOCK_SETTINGS_KEY);
-      localStorage.removeItem("vintageClockChimeSettings");
-      await Promise.all([
-        deleteClockMedia("dialImage").catch(() => {}),
-        deleteClockMedia("customChime").catch(() => {})
-      ]);
-      location.reload();
-    }
-
     function saveChimeSettings() {
       const settings = {
         enabled: chimeToggle.checked,
@@ -2180,7 +1865,6 @@
         if (customChimeUrl) URL.revokeObjectURL(customChimeUrl);
         customChimeUrl = temporaryUrl;
         customChimeName = file.name;
-        currentChimeBlob = file;
         customChimeOption.disabled = false;
         customChimeOption.textContent = `Custom: ${file.name}`;
         chimeSoundSelect.value = "custom";
@@ -2205,24 +1889,6 @@
 
     stopChimeButton.addEventListener("click", stopAllChimes);
 
-    saveClockButton.addEventListener("click", () => saveCompleteClock(true));
-    resetDefaultButton.addEventListener("click", resetClockToDefault);
-
-    document.querySelectorAll(".panel input, .panel select").forEach(control => {
-      control.addEventListener("input", scheduleClockSave);
-      control.addEventListener("change", scheduleClockSave);
-    });
-    document.querySelectorAll(".panel button").forEach(button => {
-      if (button !== saveClockButton && button !== resetDefaultButton &&
-          button !== testChimeButton && button !== stopChimeButton &&
-          button !== fullscreenButton && button !== hideControlsButton) {
-        button.addEventListener("click", scheduleClockSave);
-      }
-    });
-    clockFace.addEventListener("pointerup", scheduleClockSave);
-    clockFace.addEventListener("pointercancel", scheduleClockSave);
-    clockFace.addEventListener("wheel", scheduleClockSave, { passive: true });
-
     loadChimeSettings();
     updateChimeLabels();
     audioStatus.textContent = chimeToggle.checked ? "Hourly chime is enabled." : "Sound is off.";
@@ -2237,7 +1903,6 @@
     renderHands();
     renderHandPreviews();
     applyImageTransform();
-    restoreSavedClock();
     updateClock();
   </script>
 </body>
