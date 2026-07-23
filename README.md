@@ -4,10 +4,11 @@
 
 # Vintage Clock
 
-Bring timeless clocks back to life.
-Vintage Clock lets you create a beautiful vintage clock using your own antique dial images, elegant hands, classic numerals, and authentic clock chimes.
+**Create beautiful vintage clocks from antique clock faces — entirely in your browser.**
 
-Turn an old tablet, phone, or computer into a full-screen vintage clock that feels right at home.
+No account. No cloud. No subscriptions.
+
+Just timeless clocks.
 
 🌐 **Website**
 
@@ -112,7 +113,16 @@ These audio files are provided under the OtoLogic license and are **not covered 
 Thank you to OtoLogic for providing high-quality sound resources.
 
 ---
+## Technology
 
+- HTML5
+- CSS3
+- Vanilla JavaScript
+- Progressive Web App (PWA)
+- IndexedDB
+- Service Worker
+
+---
 ## Support the Project
 
 Vintage Clock is completely free.
