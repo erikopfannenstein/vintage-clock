@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>About Vintage Clock | Free Online Clock Customizer</title>
+  <meta name="description" content="Learn about Vintage Clock, a free online clock customizer for creating beautiful vintage clocks with your own clock faces, hands, colors, chimes, and full-screen display.">
+  <meta name="keywords" content="free online clock customizer, customize clock online free, vintage clock, antique clock, clock face designer, tablet clock, grandfather clock app">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://vintageclock.net/about.html">
+  <link rel="alternate" hreflang="en" href="https://vintageclock.net/about.html">
+  <link rel="alternate" hreflang="x-default" href="https://vintageclock.net/about.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="About Vintage Clock">
+  <meta property="og:description" content="Turn any phone, tablet, or computer into a beautiful customizable vintage clock.">
+  <meta property="og:url" content="https://vintageclock.net/about.html">
+  <meta property="og:site_name" content="Vintage Clock">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="About Vintage Clock">
+  <meta name="twitter:description" content="A free online vintage clock customizer that works directly in your browser.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "AboutPage",
+        "name": "About Vintage Clock",
+        "url": "https://vintageclock.net/about.html",
+        "description": "About Vintage Clock, a free online vintage clock customizer."
+      },
+      {
+        "@type": "WebApplication",
+        "name": "Vintage Clock",
+        "url": "https://vintageclock.net/",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires a modern web browser",
+        "isAccessibleForFree": true,
+        "description": "Create and customize vintage clocks online with clock faces, hands, colors, chimes, and full-screen display."
+      }
+    ]
+  }
+  </script>
+  <style>
+    :root {
+      --bg: #f4efe4;
+      --paper: rgba(255, 253, 247, 0.92);
+      --ink: #2f281f;
+      --muted: #6f6558;
+      --accent: #7b5b35;
+      --accent-dark: #513a21;
+      --line: rgba(81, 58, 33, 0.16);
+      --shadow: 0 18px 50px rgba(53, 40, 24, 0.12);
+      --radius: 22px;
+      --max: 920px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(155, 121, 78, 0.14), transparent 35rem),
+        linear-gradient(180deg, #f8f4eb 0%, var(--bg) 100%);
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.7;
+    }
+    a { color: inherit; }
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(14px);
+      background: rgba(248, 244, 235, 0.88);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav {
+      width: min(calc(100% - 32px), 1120px);
+      margin: 0 auto;
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .brand {
+      text-decoration: none;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      font-size: 1.08rem;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.92rem;
+    }
+    .nav-links a { text-decoration: none; color: var(--muted); }
+    .nav-links a:hover, .nav-links a:focus-visible { color: var(--accent-dark); }
+    .hero {
+      width: min(calc(100% - 32px), var(--max));
+      margin: 0 auto;
+      padding: 92px 0 52px;
+      text-align: center;
+    }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--accent);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(2.55rem, 7vw, 5.2rem);
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+    }
+    .hero-copy {
+      max-width: 730px;
+      margin: 26px auto 0;
+      color: var(--muted);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: clamp(1rem, 2.2vw, 1.22rem);
+      line-height: 1.75;
+    }
+    .tagline {
+      margin: 28px auto 0;
+      font-size: 1.12rem;
+      font-style: italic;
+      color: var(--accent-dark);
+    }
+    .actions {
+      margin-top: 34px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 22px;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+    .button:hover, .button:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(81, 58, 33, 0.16);
+    }
+    .button-primary { color: #fffdf8; background: var(--accent-dark); border-color: var(--accent-dark); }
+    .button-secondary { color: var(--accent-dark); background: transparent; }
+    main {
+      width: min(calc(100% - 32px), var(--max));
+      margin: 0 auto;
+      padding-bottom: 86px;
+    }
+    .panel {
+      margin-top: 22px;
+      padding: clamp(28px, 6vw, 56px);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    h2 { margin: 0 0 18px; font-size: clamp(1.75rem, 4vw, 2.55rem); line-height: 1.15; }
+    h3 { margin: 0 0 8px; font-size: 1.18rem; }
+    p { margin: 0 0 18px; }
+    p:last-child { margin-bottom: 0; }
+    .intro { font-size: 1.08rem; color: var(--muted); }
+    .feature-grid {
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .feature {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.4);
+    }
+    .feature p {
+      color: var(--muted);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.96rem;
+      line-height: 1.6;
+    }
+    .style-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 0;
+      margin: 26px 0 0;
+      list-style: none;
+    }
+    .style-list li {
+      padding: 8px 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--accent-dark);
+      background: rgba(255, 255, 255, 0.46);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.9rem;
+    }
+    .privacy-note { padding-left: 20px; border-left: 3px solid var(--accent); color: var(--muted); }
+    details { border-top: 1px solid var(--line); padding: 18px 0; }
+    details:last-child { padding-bottom: 0; }
+    summary { cursor: pointer; font-weight: 700; font-size: 1.06rem; }
+    details p {
+      margin-top: 12px;
+      color: var(--muted);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.96rem;
+    }
+    .story { font-size: 1.08rem; }
+    .closing { text-align: center; }
+    .closing blockquote {
+      margin: 26px auto;
+      max-width: 700px;
+      color: var(--accent-dark);
+      font-size: clamp(1.3rem, 3.6vw, 2rem);
+      line-height: 1.45;
+      font-style: italic;
+    }
+    footer {
+      padding: 30px 16px 42px;
+      text-align: center;
+      color: var(--muted);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.86rem;
+    }
+    footer a { text-decoration: none; }
+    @media (max-width: 700px) {
+      .nav { min-height: 60px; }
+      .nav-links { gap: 14px; }
+      .nav-links .optional { display: none; }
+      .hero { padding-top: 64px; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .panel { border-radius: 18px; }
+    }
+  </style>
+</head>
+<body>
+  
+  <section class="hero">
+    <p class="eyebrow">Free Online Clock Customizer</p>
+    <h1>About Vintage Clock</h1>
+    <p class="hero-copy">Vintage Clock turns any phone, tablet, or computer into a beautiful customizable clock inspired by classic mechanical timepieces.</p>
+    <p class="tagline">No account. No cloud. No subscription. Just timeless clocks.</p>
+    <div class="actions">
+      <a class="button button-primary" href="index.html">Launch Vintage Clock</a>
+      <a class="button button-secondary" href="#features">Explore Features</a>
+    </div>
+  </section>
+
+  <main>
+    <section class="panel" aria-labelledby="what-is-vintage-clock">
+      <h2 id="what-is-vintage-clock">Turn Any Device into a Beautiful Vintage Clock</h2>
+      <p class="intro">Vintage Clock is a free online clock customizer that lets you create an elegant clock directly in your browser. Upload a favorite antique dial, choose the hands, adjust the colors, select a chime, and enjoy the finished clock in full-screen mode.</p>
+      <p>It was designed for anyone who loves antique clocks, vintage home décor, traditional craftsmanship, or the idea of giving an unused screen a new purpose.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="clock-lovers">
+      <h2 id="clock-lovers">Designed for Clock Lovers</h2>
+      <p>Vintage Clock celebrates the character of traditional clocks without trying to replace them. It offers a digital way to enjoy the beauty of old dials, distinctive hands, familiar chimes, and timeless design.</p>
+      <ul class="style-list" aria-label="Clock styles">
+        <li>Classic Cream</li><li>Aged Brass</li><li>Dark Victorian</li><li>Railway Station</li><li>Art Deco</li><li>Tiffany</li><li>French Enamel</li><li>Black Forest</li><li>Skeleton</li><li>Steampunk</li><li>Pocket Watch</li><li>Vienna Regulator</li>
+      </ul>
+    </section>
+
+    <section class="panel" id="features" aria-labelledby="customize">
+      <h2 id="customize">Customize Every Detail</h2>
+      <div class="feature-grid">
+        <article class="feature"><h3>Upload Your Own Clock Face</h3><p>Use a photograph or scan of a favorite dial and position it to suit your display.</p></article>
+        <article class="feature"><h3>Choose the Clock Hands</h3><p>Mix and match hour, minute, and second hands, then adjust their style, size, and color.</p></article>
+        <article class="feature"><h3>Add Authentic Chimes</h3><p>Select a traditional chime or use your own sound to give the clock a personal character.</p></article>
+        <article class="feature"><h3>Enjoy Full-Screen Display</h3><p>Turn an old tablet, spare phone, desktop monitor, or digital display into a dedicated clock.</p></article>
+        <article class="feature"><h3>Save Automatically</h3><p>Your clock settings can be remembered locally so your design is ready when you return.</p></article>
+        <article class="feature"><h3>Use It on Almost Any Device</h3><p>Vintage Clock works in modern browsers on desktop computers, tablets, iPhones, and Android devices.</p></article>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="privacy">
+      <h2 id="privacy">Built with Privacy in Mind</h2>
+      <p class="privacy-note">Vintage Clock does not require an account. Your uploaded images and custom clock settings remain on your device and are stored locally in your browser whenever possible.</p>
+      <p>Your clock belongs to you. The app is designed to work without sending your personal clock-face images to a cloud account.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="why">
+      <h2 id="why">Why Vintage Clock?</h2>
+      <p>Many online clocks simply tell the time. Vintage Clock was made for something more personal: recreating the feeling of owning and enjoying a beautiful traditional clock.</p>
+      <p>Whether you are displaying a family heirloom, experimenting with an antique dial, decorating a room, or repurposing an old tablet, Vintage Clock gives you a simple and free way to create a clock that feels like your own.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="faq">
+      <h2 id="faq">Frequently Asked Questions</h2>
+      <details><summary>Is Vintage Clock free?</summary><p>Yes. Vintage Clock is free to use in your web browser.</p></details>
+      <details><summary>Do I need an account?</summary><p>No. You can use the clock without creating an account or subscription.</p></details>
+      <details><summary>Can I upload my own clock face?</summary><p>Yes. You can use your own clock-face image and combine it with customizable hands and other settings.</p></details>
+      <details><summary>Does it work on an iPad or Android tablet?</summary><p>Yes. Many people can use a tablet as a dedicated full-screen vintage clock or wall display.</p></details>
+      <details><summary>Are my images uploaded to a server?</summary><p>Vintage Clock is designed to keep your images and settings on your own device rather than placing them in a personal cloud account.</p></details>
+      <details><summary>Can I install Vintage Clock?</summary><p>On supported devices, Vintage Clock can be added to the Home Screen and used like an app.</p></details>
+    </section>
+
+    <section class="panel story" aria-labelledby="story">
+      <h2 id="story">The Story Behind Vintage Clock</h2>
+      <p>Vintage Clock began with a simple idea: many beautiful antique clocks are no longer able to keep accurate time, yet their craftsmanship, history, and character still deserve to be enjoyed.</p>
+      <p>Instead of allowing a treasured dial or old clock case to disappear, a modern screen can give it a new life. Vintage Clock makes it possible to preserve, recreate, and enjoy the appearance of classic clocks using a phone, tablet, or computer.</p>
+      <p>It is not about replacing antique clocks. It is about celebrating them and making their beauty accessible in a new form.</p>
+    </section>
+
+    <section class="panel closing" aria-labelledby="ready">
+      <h2 id="ready">Ready to Create Your Own Clock?</h2>
+      <blockquote>“Every antique clock has a story. Vintage Clock helps you keep telling it.”</blockquote>
+      <a class="button button-primary" href="index.html">Launch Vintage Clock</a>
+    </section>
+  </main>
+<footer>
+  <p>© 2026 Vintage Clock</p>
+</footer>
+  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>
