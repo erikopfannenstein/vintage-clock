@@ -1,868 +1,2281 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Medication Order Tracking</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1f3a5f">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta charset="utf-8"/>
+<meta content="Create beautiful vintage clocks online using antique clock faces, elegant hands, authentic chimes and full-screen display. Works on iPhone, Android and desktop." name="description"/>
+<meta content="Vintage Clock" property="og:title"/>
+<meta content="Create beautiful vintage clocks online." property="og:description"/>
+<meta content="https://vintageclock.net/icons/icon-512.png" property="og:image"/>
+<meta content="https://vintageclock.net" property="og:url"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport">
+<meta content="#15110d" name="theme-color">
+<meta content="yes" name="apple-mobile-web-app-capable">
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style">
+<meta content="Vintage Clock" name="apple-mobile-web-app-title"/>
+<meta content="yes" name="mobile-web-app-capable"/>
+<link href="manifest.json" rel="manifest"/>
+<link href="icons/icon-180.png" rel="apple-touch-icon"/>
+<title>Vintage Clock – Create Beautiful Vintage Clocks Online</title>
 <style>
-:root{
-  --bg:#f3f5f7;--panel:#fff;--text:#1f2937;--muted:#6b7280;--border:#d1d5db;
-  --accent:#245c9f;--accent2:#eaf1fb;--danger:#b91c1c;--warn:#b45309;--ok:#047857
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
-header{background:#1f3a5f;color:#fff;padding:18px 22px}
-header h1{margin:0;font-size:1.45rem}
-header p{margin:6px 0 0;color:#dbeafe;font-size:.92rem}
-main{max-width:1180px;margin:0 auto;padding:18px}
-.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px}
-.panel h2{margin:0 0 12px;font-size:1.12rem}
-.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-.stat{border:1px solid var(--border);border-radius:10px;padding:12px;background:#fff}
-.stat strong{display:block;font-size:1.5rem;margin-top:3px}
-.overdue{border-left:6px solid var(--danger)} .today{border-left:6px solid var(--warn)}
-.soon{border-left:6px solid #ca8a04}.current{border-left:6px solid var(--ok)}
-.reminder-list{display:grid;gap:8px}
-.reminder-item{display:grid;grid-template-columns:1.2fr 1.4fr .9fr auto;gap:10px;align-items:center;border:1px solid var(--border);border-radius:10px;padding:10px}
-.badge{display:inline-block;border-radius:999px;padding:4px 8px;font-size:.78rem;font-weight:bold}
-.badge-overdue{background:#fee2e2;color:#991b1b}.badge-today{background:#ffedd5;color:#9a3412}.badge-soon{background:#fef9c3;color:#854d0e}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.tab{background:#e5e7eb;color:#111827}
-.tab.active{background:var(--accent);color:#fff}
-.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-label{display:block;font-size:.85rem;font-weight:bold;color:#374151}
-input,select,textarea,button{font:inherit}
-input,select,textarea{width:100%;margin-top:5px;border:1px solid var(--border);border-radius:8px;padding:9px;background:#fff}
-textarea{min-height:74px;resize:vertical}
-.readonly{background:#f3f4f6}
-.span-2{grid-column:span 2}.span-4{grid-column:span 4}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-button{border:0;border-radius:8px;padding:9px 13px;cursor:pointer}
-.primary{background:var(--accent);color:#fff}.secondary{background:#e5e7eb;color:#111827}
-.danger{background:#fee2e2;color:#991b1b}.success{background:#d1fae5;color:#065f46}
-.toolbar{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
-.toolbar>div{min-width:180px;flex:1}
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;margin-top:12px;min-width:980px}
-th,td{border-bottom:1px solid var(--border);text-align:left;padding:9px;font-size:.9rem;vertical-align:top}
-th{background:#f9fafb}
-tr.due-overdue{background:#fff5f5}tr.due-today{background:#fffaf0}tr.due-soon{background:#fffdea}
-.small{font-size:.82rem;color:var(--muted)}
-.empty{padding:14px;color:var(--muted);text-align:center;border:1px dashed var(--border);border-radius:10px}
-.info-strip{background:var(--accent2);border:1px solid #cbdcf3;border-radius:10px;padding:10px;margin-top:12px}
-.log-panel{margin-top:14px;border-top:1px solid var(--border);padding-top:14px}
-.log-entry{border:1px solid var(--border);border-radius:9px;padding:10px;margin-top:8px;background:#fafafa}
-.log-entry-header{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:5px}
-.log-text{white-space:pre-wrap;word-break:break-word}
-.log-compose{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
-.log-compose textarea{min-height:72px}
-.hidden{display:none}
-.resident-scroll{max-height:430px;overflow-y:auto;border:1px solid var(--border);border-radius:10px;margin-top:12px}
-.resident-scroll table{margin-top:0}
-.medication-scroll{max-height:560px;overflow:auto;border:1px solid var(--border);border-radius:10px;margin-top:12px}
-.medication-scroll table{margin-top:0}
-.med-link{background:none;border:0;padding:0;color:var(--accent);font-weight:bold;text-decoration:underline;cursor:pointer;text-align:left}
-.quick-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
-.quick-tag{padding:5px 8px;border:1px solid var(--border);background:#fff;color:var(--text)}
-.quick-tag.active{background:#fee2e2;color:#991b1b;border-color:#fecaca;font-weight:bold}
-.urgent-row{border-left:6px solid var(--danger)!important}
-.followup-item{grid-template-columns:1.1fr 1.5fr auto!important}
-.update-banner{display:none;background:#fff7ed;border:1px solid #fdba74;border-radius:10px;padding:10px 12px;margin-bottom:14px;align-items:center;justify-content:space-between;gap:10px}
-.update-banner.show{display:flex}
-footer{max-width:1180px;margin:0 auto 25px;padding:0 18px;color:var(--muted);font-size:.8rem}
-@media(max-width:850px){
-  .summary{grid-template-columns:repeat(2,1fr)}
-  .form-grid{grid-template-columns:1fr 1fr}
-  .span-4{grid-column:span 2}
-  .reminder-item{grid-template-columns:1fr}
-}
-@media(max-width:520px){
-  .form-grid{grid-template-columns:1fr}
-  .span-2,.span-4{grid-column:span 1}
-}
-</style>
-</head>
-<body>
-<header>
-  <h1>Medication Order Tracking</h1>
-  <p>Residents entered once • Tracks ordering through delivery • Local browser storage • v1.4</p>
-</header>
-
-<main>
-<div id="updateBanner" class="update-banner">
-  <span>A newer version of Medication Order Tracking is available.</span>
-  <button id="updateNowBtn" class="primary" type="button">Update now</button>
-</div>
-<section class="panel">
-  <h2>Reminders</h2>
-  <div class="summary">
-    <div class="stat overdue"><span>Refill overdue</span><strong id="countOverdue">0</strong></div>
-    <div class="stat today"><span>Refill due today</span><strong id="countToday">0</strong></div>
-    <div class="stat soon"><span>Refill due in 7 days</span><strong id="countSoon">0</strong></div>
-    <div class="stat current"><span>Orders to follow up</span><strong id="countFollowup">0</strong></div>
-  </div>
-  <h3 style="margin:8px 0">Order follow-up</h3>
-  <div id="followupList" class="reminder-list"></div>
-  <h3 style="margin:16px 0 8px">Upcoming refill reminders</h3>
-  <div id="reminderList" class="reminder-list"></div>
-</section>
+    :root {
+      --panel: rgba(25, 19, 14, 0.97);
+      --panel-border: rgba(255,255,255,0.12);
+      --text: #f4ebdf;
+      --muted: #c8b9a8;
+      --accent: #c8a96b;
+      --button: #30261d;
+      --button-hover: #443629;
+      --shadow: 0 20px 60px rgba(0,0,0,0.45);
+      --hand-color: #171411;
+      --hand-highlight: #4f4337;
+      --center-color: #b98a42;
+      --second-color: #8d211d;
+    }
 
 
-<section class="panel">
-  <div class="tabs">
-    <button class="tab active" id="residentTabBtn" type="button">Residents</button>
-    <button class="tab" id="medTabBtn" type="button">Medications</button>
-  </div>
+    .app-guide-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(8px);
+    }
 
-  <div id="residentTab">
-    <h2 id="residentFormTitle">Add resident</h2>
-    <div class="form-grid">
-      <label>Patient name
-        <input id="residentName" autocomplete="off">
-      </label>
-      <label>Date of birth
-        <input id="residentDob" type="date">
-      </label>
-      <label>Default pharmacy
-        <input id="residentPharmacy" autocomplete="off">
-      </label>
-      <label>Pharmacy phone
-        <input id="residentPhone" type="tel" autocomplete="off">
-      </label>
-      <label class="span-4">Resident notes
-        <textarea id="residentNotes" placeholder="Optional"></textarea>
-      </label>
-    </div>
-    <div class="actions">
-      <button class="primary" id="saveResidentBtn" type="button">Save resident</button>
-      <button class="secondary" id="clearResidentBtn" type="button">Clear form</button>
-    </div>
+    .app-guide-overlay.open { display: flex; }
 
-    <div class="resident-scroll">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Patient</th><th>DOB</th><th>Default pharmacy</th><th>Phone</th><th>Notes</th><th>Actions</th></tr>
-          </thead>
-          <tbody id="residentTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+    .app-guide-card {
+      width: min(460px, 100%);
+      max-height: calc(100dvh - 40px);
+      overflow: auto;
+      padding: 24px;
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      color: var(--text);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
 
-  <div id="medTab" class="hidden">
-    <h2 id="medFormTitle">Add medication</h2>
-    <div class="form-grid">
-      <label>Patient
-        <select id="patientSelect"></select>
-      </label>
-      <label>Date of birth
-        <input id="medDob" class="readonly" readonly>
-      </label>
-      <label>Pharmacy
-        <input id="medPharmacy" class="readonly" readonly>
-      </label>
-      <label>Pharmacy phone
-        <input id="medPhone" class="readonly" readonly>
-      </label>
-      <label>Medication
-        <input id="medication" autocomplete="off">
-      </label>
-      <label>Rx number
-        <input id="rxNumber" autocomplete="off">
-      </label>
-      <label>Last delivered date
-        <input id="lastOrderDate" type="date">
-      </label>
-      <label>Remind after delivery (days)
-        <input id="reminderDays" type="number" min="1" value="23">
-      </label>
-      <label>Order placed date
-        <input id="orderPlacedDate" type="date">
-      </label>
-      <label>Follow-up date
-        <input id="followUpDate" type="date">
-      </label>
-      <label>Days supply
-        <input id="daysSupply" type="number" min="1" placeholder="30">
-      </label>
-      <label>Status
-        <select id="status">
-          <option value="Active">Ready for next refill cycle</option>
-          <option value="Ordered">Ordered</option>
-          <option value="In progress">In progress</option>
-          <option value="Insurance issue">Insurance issue</option>
-          <option value="Ready for pickup">Ready for pickup</option>
-          <option value="Inactive">Inactive</option>
-        </select>
-      </label>
-      <label class="span-2">Notes
-        <textarea id="medNotes" placeholder="Example: Pharmacy said call again after August 20."></textarea>
-      </label>
-    </div>
-    <div class="info-strip" id="patientInfo">Select a resident to automatically fill DOB and pharmacy information.</div>
-    <div class="actions">
-      <button class="primary" id="saveMedBtn" type="button">Save medication</button>
-      <button class="secondary" id="clearMedBtn" type="button">Clear form</button>
-    </div>
+    .app-guide-card h2 { margin: 0 0 10px; font-size: 1.35rem; }
+    .app-guide-card p { margin: 8px 0; color: var(--muted); line-height: 1.5; }
+    .app-guide-steps { margin: 16px 0; padding-left: 22px; line-height: 1.65; }
+    .app-guide-note {
+      padding: 11px 12px;
+      border: 1px solid rgba(200,169,107,0.35);
+      border-radius: 10px;
+      background: rgba(200,169,107,0.09);
+      color: var(--text) !important;
+    }
 
-    <div id="callLogPanel" class="log-panel hidden">
-      <h3 style="margin:0 0 8px">Call log</h3>
-      <div class="log-compose">
-        <label>New log entry
-          <textarea id="callLogText" placeholder="Example: Called CVS. Insurance rejected; pharmacy will send PA request to provider."></textarea>
-        </label>
-        <button class="primary" id="addCallLogBtn" type="button">Add log</button>
-      </div>
-      <div id="callLogList"></div>
-    </div>
-  </div>
-</section>
+    * { box-sizing: border-box; }
 
-<section class="panel">
-  <h2>All medications</h2>
-  <div class="toolbar">
-    <div><label>Search<input id="searchInput" placeholder="Patient, medication, Rx, pharmacy..."></label></div>
-    <div><label>Filter
-      <select id="filterSelect">
-        <option value="all">All records</option>
-        <option value="due">Due or overdue</option>
-        <option value="soon">Due within 7 days</option>
-        <option value="active">Ready for next refill cycle</option>
-        <option value="followup">Orders needing follow-up</option>
-        <option value="insurance">Insurance issue</option>
-        <option value="calllogs">Has call logs</option>
-        <option value="inactive">Inactive</option>
-      </select>
-    </label></div>
-  </div>
-  <div class="actions">
-    <button class="secondary" id="exportBtn" type="button">Export backup</button>
-    <button class="secondary" id="importBtn" type="button">Import backup</button>
-    <input id="importFile" type="file" accept=".json" hidden>
-  </div>
-  <div class="medication-scroll">
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Patient</th><th>Medication</th><th>Rx / Pharmacy</th><th>Last delivered</th>
-          <th>Next refill / Follow-up</th><th>Status</th><th>Notes</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="medTableBody"></tbody>
-    </table>
-  </div>
-  </div>
-</section>
-</main>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      color: var(--text);
+      font-family: Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(circle at center, #2a2118 0%, #18120e 48%, #0d0a08 100%);
+      overflow: hidden;
+    }
 
-<footer>
-Data is stored only in this browser. Use Export Backup regularly. Do not save backups in an unapproved personal cloud or email account.
-</footer>
+    body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 380px;
+    }
 
-<script>
-(() => {
-  const DATA_KEY = "medicationOrderReminder.data.v2";
-  const OLD_KEY = "medicationOrderReminder.records.v1";
-  let data = loadData();
-  data.settings = {
-    residentSort: data.settings?.residentSort || "lastName",
-    defaultReminderDays: Number(data.settings?.defaultReminderDays || 23)
-  };
-  data.residents = (data.residents || []).map((r,index)=>({...r, customOrder:Number.isFinite(r.customOrder)?r.customOrder:index}));
-  data.medications = (data.medications || []).map(m => ({
-    orderPlacedDate:"",
-    followUpDate:"",
-    callLogs:[],
-    paFlag:false,
-    callFlag:false,
-    urgentFlag:false,
-    ...m,
-    callLogs:Array.isArray(m.callLogs)?m.callLogs:[],
-    paFlag:Boolean(m.paFlag),
-    callFlag:Boolean(m.callFlag),
-    urgentFlag:Boolean(m.urgentFlag)
-  }));
-  let editingResidentId = null;
-  let editingMedId = null;
-  const $ = id => document.getElementById(id);
+    .clock-stage {
+      position: relative;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow: hidden;
+      user-select: none;
+    }
 
-  function loadData(){
-    try{
-      const raw = localStorage.getItem(DATA_KEY);
-      if(raw) return JSON.parse(raw);
-      const old = localStorage.getItem(OLD_KEY);
-      if(old){
-        const oldRecords = JSON.parse(old);
-        const residents = [];
-        const medications = [];
-        oldRecords.forEach(r => {
-          let resident = residents.find(x =>
-            x.name === r.patientName &&
-            x.dob === r.dob &&
-            x.pharmacy === r.pharmacyName &&
-            x.phone === r.pharmacyPhone
-          );
-          if(!resident){
-            resident = {
-              id: crypto.randomUUID(),
-              name:r.patientName || "",
-              dob:r.dob || "",
-              pharmacy:r.pharmacyName || "",
-              phone:r.pharmacyPhone || "",
-              notes:""
-            };
-            residents.push(resident);
-          }
-          medications.push({
-            id:r.id || crypto.randomUUID(),
-            residentId:resident.id,
-            medication:r.medication || "",
-            rxNumber:r.rxNumber || "",
-            lastOrderDate:r.lastOrderDate || "",
-            orderPlacedDate:"",
-            followUpDate:"",
-            callLogs:[],
-            paFlag:false,
-            callFlag:false,
-            urgentFlag:false,
-            reminderDays:Number(r.reminderDays || 23),
-            daysSupply:Number(r.daysSupply || 0),
-            status:r.status || "Active",
-            notes:r.notes || ""
-          });
-        });
-        return {residents, medications, settings:{defaultReminderDays:23}};
+    .clock-shell {
+      position: relative;
+      width: min(82vmin, 900px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 50%, #5d4327 0 56%, #2d1d11 57% 64%, #8b673b 65% 68%, #21140c 69% 100%);
+      box-shadow:
+        0 0 0 10px rgba(0,0,0,0.35),
+        inset 0 0 40px rgba(255,255,255,0.08),
+        inset 0 0 90px rgba(0,0,0,0.7),
+        var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .clock-face {
+      position: relative;
+      width: 82%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      overflow: hidden;
+      background:
+        radial-gradient(circle, #f1e2bd 0%, #e1c991 63%, #b49357 100%);
+      box-shadow:
+        inset 0 0 20px rgba(74,42,15,0.55),
+        0 0 0 4px #2b1c10;
+      touch-action: none;
+    }
+
+    .default-dial,
+    .dial-image {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+    }
+
+    .default-dial {
+      z-index: 1;
+      transform: translate(-50%, -50%);
+    }
+
+    .default-dial::before {
+      content: "";
+      position: absolute;
+      inset: 4%;
+      border-radius: 50%;
+      border: 2px solid rgba(69,42,18,0.75);
+      box-shadow: inset 0 0 0 4px rgba(255,255,255,0.12);
+    }
+
+    .dial-image {
+      z-index: 2;
+      display: none;
+      object-fit: contain;
+      background: transparent;
+      transform-origin: center;
+      pointer-events: none;
+      will-change: transform;
+    }
+
+
+    /* Optional numeral overlay: independent from the uploaded dial image. */
+    .number-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      color: var(--overlay-number-color, #21150d);
+      font-family: var(--overlay-number-font, Georgia, "Times New Roman", serif);
+      font-weight: 700;
+      text-shadow: 0 1px 1px rgba(255,255,255,0.45), 0 1px 3px rgba(0,0,0,0.18);
+    }
+
+    .overlay-number {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 14%;
+      height: 10%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--overlay-number-size, clamp(18px, 3.6vmin, 48px));
+      line-height: 1;
+      white-space: nowrap;
+      transform:
+        translate(-50%, -50%)
+        rotate(calc(var(--i) * 30deg))
+        translateY(calc(-1 * var(--overlay-number-radius, 360%)))
+        rotate(calc(var(--i) * -30deg));
+      transform-origin: center;
+    }
+
+    .numeral {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 10%;
+      height: 12%;
+      margin-left: -5%;
+      margin-top: -6%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #21150d;
+      font-weight: 700;
+      font-size: clamp(18px, 3.6vmin, 48px);
+      transform:
+        rotate(calc(var(--i) * 30deg))
+        translateY(-355%)
+        rotate(calc(var(--i) * -30deg));
+      text-shadow: 0 1px 0 rgba(255,255,255,0.45);
+    }
+
+    .minute-mark {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0.35%;
+      height: 4.5%;
+      background: rgba(38,23,13,0.86);
+      transform-origin: 50% 0;
+      transform:
+        rotate(calc(var(--i) * 6deg))
+        translateY(-1020%);
+    }
+
+    .minute-mark.major {
+      width: 0.8%;
+      height: 7%;
+      background: #1f140c;
+      transform:
+        rotate(calc(var(--i) * 6deg))
+        translateY(-690%);
+    }
+
+    .brand {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      color: rgba(45,28,16,0.82);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: clamp(12px, 1.8vmin, 24px);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .hands-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 8;
+      pointer-events: none;
+      filter: drop-shadow(0 3px 2px rgba(0,0,0,0.45));
+    }
+
+    .rotating-hand {
+      position: absolute;
+      inset: 0;
+      transform-origin: 50% 50%;
+      pointer-events: none;
+    }
+
+    .rotating-hand svg {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 18%;
+      height: 50%;
+      overflow: visible;
+      transform: translate(-50%, -100%);
+    }
+
+    .hour-hand svg {
+      width: 18%;
+      height: 33%;
+    }
+
+    .minute-hand svg {
+      width: 16%;
+      height: 44%;
+    }
+
+    .second-hand {
+      z-index: 10;
+    }
+
+    /* The lower end of this shaft is fixed precisely at the dial center. */
+    .second-hand-shaft {
+      position: absolute;
+      left: 50%;
+      bottom: 50%;
+      width: var(--second-hand-width, clamp(2px, 0.42%, 5px));
+      height: var(--second-hand-length, 46%);
+      transform: translateX(-50%);
+      transform-origin: 50% 100%;
+      border-radius: 999px 999px 2px 2px;
+      background: var(--second-color);
+      box-shadow: 0 0 0 0.5px rgba(50,0,0,0.38);
+    }
+
+    .second-hand-tip {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 260%;
+      aspect-ratio: 1;
+      transform: translate(-50%, -34%) rotate(45deg);
+      background: var(--second-color);
+      border-radius: 20% 70% 20% 70%;
+    }
+
+    .second-hand-tail {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: var(--second-hand-tail-width, clamp(2px, 0.34%, 4px));
+      height: var(--second-hand-tail-length, 8%);
+      transform: translateX(-50%);
+      background: var(--second-color);
+      border-radius: 0 0 999px 999px;
+    }
+
+    .second-hand-tail::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -22%;
+      width: 430%;
+      aspect-ratio: 1;
+      transform: translateX(-50%);
+      border: clamp(1px, 0.18vmin, 3px) solid var(--second-color);
+      border-radius: 50%;
+      background: transparent;
+    }
+
+
+    /* Second-hand style variations */
+    .second-hand.second-style-straight .second-hand-tip,
+    .second-hand.second-style-straight .second-hand-tail::after { display: none; }
+
+    .second-hand.second-style-needle .second-hand-tip {
+      width: 230%;
+      height: 8%;
+      aspect-ratio: auto;
+      transform: translate(-50%, -18%);
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      border-radius: 0;
+    }
+    .second-hand.second-style-needle .second-hand-tail::after { display: none; }
+
+    .second-hand.second-style-diamond .second-hand-tip {
+      width: 330%;
+      transform: translate(-50%, -42%) rotate(45deg);
+      border-radius: 12%;
+    }
+
+    .second-hand.second-style-counterweight .second-hand-tip { display: none; }
+    .second-hand.second-style-counterweight .second-hand-tail::after {
+      bottom: -38%;
+      width: 560%;
+      border-width: 0;
+      background: var(--second-color);
+    }
+
+    .second-hand.second-style-minimal .second-hand-tip,
+    .second-hand.second-style-minimal .second-hand-tail { display: none; }
+
+    .hand-fill {
+      fill: var(--hand-color);
+      stroke: var(--hand-highlight);
+      stroke-width: 1.2;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .hand-cutout {
+      fill: none;
+      stroke: var(--hand-highlight);
+      stroke-width: 2;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .second-fill {
+      fill: var(--second-color);
+      stroke: rgba(50,0,0,0.4);
+      stroke-width: 0.8;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .center-cap {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 5%;
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%);
+      z-index: 12;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 35%, #f0d69a 0%, var(--center-color) 42%, #33200d 100%);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+      pointer-events: none;
+    }
+
+    .crosshair {
+      position: absolute;
+      inset: 0;
+      display: none;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .crosshair::before,
+    .crosshair::after {
+      content: "";
+      position: absolute;
+      background: rgba(255,70,70,0.92);
+      box-shadow: 0 0 5px rgba(0,0,0,0.8);
+    }
+
+    .crosshair::before {
+      left: 50%;
+      top: 34%;
+      width: 2px;
+      height: 32%;
+      transform: translateX(-50%);
+    }
+
+    .crosshair::after {
+      top: 50%;
+      left: 34%;
+      height: 2px;
+      width: 32%;
+      transform: translateY(-50%);
+    }
+
+    .clock-face.adjusting { cursor: grab; }
+    .clock-face.adjusting:active { cursor: grabbing; }
+    .clock-face.adjusting .crosshair { display: block; }
+
+    .panel {
+      height: 100%;
+      padding: 24px 20px;
+      background: var(--panel);
+      border-left: 1px solid var(--panel-border);
+      overflow-y: auto;
+      box-shadow: -10px 0 30px rgba(0,0,0,0.22);
+    }
+
+    .panel h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      margin: 0 0 22px;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .control-group {
+      margin-bottom: 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    .control-group:last-child { border-bottom: 0; }
+
+    .group-title,
+    .control-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input[type="file"],
+    input[type="time"],
+    select,
+    button {
+      width: 100%;
+      min-height: 42px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: var(--button);
+      color: var(--text);
+      padding: 10px 12px;
+      font: inherit;
+    }
+
+    input[type="file"] {
+      padding: 8px;
+      font-size: 13px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 42px;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 10px;
+      background: var(--button);
+      padding: 4px;
+      cursor: pointer;
+    }
+
+    button {
+      cursor: pointer;
+      transition: background 0.18s ease, transform 0.18s ease;
+    }
+
+    button:hover { background: var(--button-hover); }
+    button:active { transform: translateY(1px); }
+
+    button.active {
+      background: #6e542d;
+      border-color: var(--accent);
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .switch-row {
+      display: flex !important;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+
+    .switch-row input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--accent);
+    }
+
+    .slider-row { margin: 13px 0; }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .slider-value {
+      color: var(--text);
+      min-width: 52px;
+      text-align: right;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .hand-card {
+      position: relative;
+      min-height: 92px;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(78,52,25,0.34);
+      background: radial-gradient(circle, #f1e2bd 0%, #e1c991 100%);
+      color: #2b1c10;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: inset 0 0 10px rgba(74,42,15,0.16);
+    }
+
+    .hand-card.selected {
+      border-color: #7c5b2e;
+      box-shadow: inset 0 0 0 2px #9b753e, inset 0 0 12px rgba(74,42,15,0.22);
+      background: radial-gradient(circle, #f6e9c9 0%, #e6cf98 100%);
+    }
+
+    .hand-card svg {
+      width: 100%;
+      height: 58px;
+      overflow: visible;
+    }
+
+    .hand-card span {
+      display: block;
+      margin-top: 3px;
+      font-size: 12px;
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .quiet-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .status,
+    .instruction {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .status {
+      margin-top: 10px;
+      min-height: 1.4em;
+    }
+
+    .floating-controls {
+      display: none;
+      position: fixed;
+      right: 12px;
+      bottom: 12px;
+      z-index: 40;
+    }
+
+    .floating-controls button {
+      width: auto;
+      min-width: 126px;
+      background: rgba(20,15,11,0.84);
+      backdrop-filter: blur(8px);
+    }
+
+    body.controls-hidden {
+      grid-template-columns: 1fr;
+    }
+
+    body.controls-hidden .panel { display: none; }
+    body.controls-hidden .floating-controls { display: block; }
+    body.controls-hidden .clock-shell { width: min(92vmin, 1050px); }
+
+    @media (max-width: 920px) {
+      html, body { overflow: auto; }
+      body { display: block; }
+      .clock-stage { min-height: 72vh; }
+      .panel {
+        height: auto;
+        border-left: 0;
+        border-top: 1px solid var(--panel-border);
       }
-    }catch(e){}
-    return {residents:[], medications:[], settings:{defaultReminderDays:23}};
-  }
-
-  function saveData(){
-    localStorage.setItem(DATA_KEY, JSON.stringify(data));
-  }
-
-  function esc(v){
-    return String(v ?? "").replace(/[&<>"']/g, c => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-    })[c]);
-  }
-
-  function todayStr(date=new Date()){
-    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
-  }
-
-  function addDays(dateStr,days){
-    if(!dateStr) return "";
-    const [y,m,d]=dateStr.split("-").map(Number);
-    const dt=new Date(y,m-1,d);
-    dt.setDate(dt.getDate()+Number(days||0));
-    return todayStr(dt);
-  }
-
-  function diffDays(fromStr,toStr){
-    const [fy,fm,fd]=fromStr.split("-").map(Number);
-    const [ty,tm,td]=toStr.split("-").map(Number);
-    return Math.round((new Date(ty,tm-1,td)-new Date(fy,fm-1,fd))/86400000);
-  }
-
-  function fmt(dateStr){
-    if(!dateStr) return "";
-    const [y,m,d]=dateStr.split("-").map(Number);
-    return new Date(y,m-1,d).toLocaleDateString();
-  }
-
-  function residentFor(med){ return data.residents.find(r=>r.id===med.residentId); }
-
-  function dueInfo(med){
-    const next=addDays(med.lastOrderDate,med.reminderDays);
-    if(!next || med.status!=="Active") return {next,type:"current",days:null};
-    const diff=diffDays(todayStr(),next);
-    if(diff<0) return {next,type:"overdue",days:Math.abs(diff)};
-    if(diff===0) return {next,type:"today",days:0};
-    if(diff<=7) return {next,type:"soon",days:diff};
-    return {next,type:"current",days:diff};
-  }
-
-  function switchTab(tab){
-    const residents = tab==="residents";
-    $("residentTab").classList.toggle("hidden",!residents);
-    $("medTab").classList.toggle("hidden",residents);
-    $("residentTabBtn").classList.toggle("active",residents);
-    $("medTabBtn").classList.toggle("active",!residents);
-  }
-
-  function lastNameKey(name){
-    const clean=String(name||"").trim().replace(/\s+/g," ");
-    if(!clean)return "";
-    if(clean.includes(","))return clean.split(",")[0].trim().toLowerCase();
-    const parts=clean.split(" ");
-    return parts[parts.length-1].toLowerCase();
-  }
-
-  function sortedResidents(){
-    return [...data.residents].sort((a,b)=>lastNameKey(a.name).localeCompare(lastNameKey(b.name))||a.name.localeCompare(b.name));
-  }
-
-  function renderSettings(){
-  }
-
-
-  function renderAll(){
-    renderSettings();
-    renderPatientSelect();
-    renderResidents();
-    renderSummary();
-    renderMedTable();
-    updatePatientFields();
-  }
-
-  function renderPatientSelect(){
-    const current=$("patientSelect").value;
-    const sorted=sortedResidents();
-    $("patientSelect").innerHTML='<option value="">Select resident...</option>'+
-      sorted.map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join("");
-    if(data.residents.some(r=>r.id===current)) $("patientSelect").value=current;
-  }
-
-  function renderResidents(){
-    if(!data.residents.length){
-      $("residentTableBody").innerHTML='<tr><td colspan="6" class="empty">No residents entered yet.</td></tr>';
-      return;
+      body.controls-hidden .clock-stage { min-height: 100vh; }
     }
-    const residents=sortedResidents();
-    $("residentTableBody").innerHTML=residents.map((r,index)=>`
-      <tr>
-        <td><strong>${esc(r.name)}</strong></td>
-        <td>${esc(fmt(r.dob))}</td>
-        <td>${esc(r.pharmacy)}</td>
-        <td>${esc(r.phone)}</td>
-        <td>${esc(r.notes)}</td>
-        <td><div class="actions">
-          <button class="secondary edit-resident" data-id="${r.id}" type="button">Edit</button>
-          <button class="primary add-med-for" data-id="${r.id}" type="button">Add medication</button>
-          <button class="danger delete-resident" data-id="${r.id}" type="button">Delete</button>
-        </div></td>
-      </tr>`).join("");
+  
 
-    document.querySelectorAll(".edit-resident").forEach(b=>b.addEventListener("click",()=>editResident(b.dataset.id)));
-    document.querySelectorAll(".add-med-for").forEach(b=>b.addEventListener("click",()=>addMedForResident(b.dataset.id)));
-    document.querySelectorAll(".delete-resident").forEach(b=>b.addEventListener("click",()=>deleteResident(b.dataset.id)));
-  }
-
-  function renderSummary(){
-    const refillMeds=data.medications.filter(m=>m.status==="Active");
-    const followupMeds=data.medications.filter(m=>["Ordered","In progress","Insurance issue","Ready for pickup"].includes(m.status));
-    const groups={overdue:[],today:[],soon:[],current:[]};
-    refillMeds.forEach(m=>groups[dueInfo(m).type].push(m));
-
-    $("countOverdue").textContent=groups.overdue.length;
-    $("countToday").textContent=groups.today.length;
-    $("countSoon").textContent=groups.soon.length;
-    $("countFollowup").textContent=followupMeds.length;
-
-    const followups=[...followupMeds].sort((a,b)=>{
-      if(Boolean(a.urgentFlag)!==Boolean(b.urgentFlag)) return a.urgentFlag?-1:1;
-      return (a.followUpDate||"9999-12-31").localeCompare(b.followUpDate||"9999-12-31");
-    });
-    if(!followups.length){
-      $("followupList").innerHTML='<div class="empty">No current pharmacy orders need follow-up.</div>';
-    }else{
-      $("followupList").innerHTML=followups.map(m=>{
-        const r=residentFor(m)||{};
-        const follow=m.followUpDate||"";
-        const isDue=follow && follow<=todayStr();
-        return `<div class="reminder-item followup-item ${m.urgentFlag?'urgent-row':''}">
-          <div><strong>${esc(r.name||"Unknown resident")}</strong><div class="small">DOB: ${esc(fmt(r.dob))}</div></div>
-          <div><button class="med-link edit-from-followup" data-id="${m.id}" type="button">${esc(m.medication)}</button>
-            <div class="small">Rx ${esc(m.rxNumber||"—")} • ${esc(m.status)}${follow?` • Follow up ${esc(fmt(follow))}`:""}</div>
-            <div class="quick-tags">
-              ${m.callFlag?'<span class="badge badge-soon" title="Call follow-up">☎</span>':''}
-              ${m.urgentFlag?'<span class="badge badge-overdue" title="Urgent flag">⚑</span>':''}
-            </div>
-          </div>
-          <div class="actions">
-            <button class="quick-tag icon-tag toggle-call-top ${m.callFlag?'active':''}" title="Call follow-up" aria-label="Call follow-up" data-id="${m.id}" type="button">☎</button>
-            <button class="quick-tag icon-tag toggle-urgent-top ${m.urgentFlag?'active':''}" title="Urgent flag" aria-label="Urgent flag" data-id="${m.id}" type="button">⚑</button>
-            <button class="success delivered-top" data-id="${m.id}" type="button">Delivered</button>
-          </div>
-        </div>`;
-      }).join("");
-      document.querySelectorAll(".edit-from-followup").forEach(b=>b.addEventListener("click",()=>editMedication(b.dataset.id)));
-      document.querySelectorAll(".toggle-call-top").forEach(b=>b.addEventListener("click",()=>toggleFlag(b.dataset.id,"callFlag")));
-      document.querySelectorAll(".toggle-urgent-top").forEach(b=>b.addEventListener("click",()=>toggleFlag(b.dataset.id,"urgentFlag")));
-      document.querySelectorAll(".delivered-top").forEach(b=>b.addEventListener("click",()=>markDelivered(b.dataset.id)));
+    .top-nav{
+      position:fixed;
+      top:16px;
+      right:22px;
+      z-index:9999;
+      font-family:Georgia,"Times New Roman",serif;
     }
-
-    const urgent=[...groups.overdue,...groups.today,...groups.soon]
-      .sort((a,b)=>dueInfo(a).next.localeCompare(dueInfo(b).next));
-
-    if(!urgent.length){
-      $("reminderList").innerHTML='<div class="empty">No refill reminders are due within the next 7 days.</div>';
-      return;
+    .top-nav a{
+      color:var(--accent);
+      text-decoration:none;
+      font-size:15px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(20,15,11,.35);
+      backdrop-filter:blur(6px);
+      transition:.2s;
     }
-
-    $("reminderList").innerHTML=urgent.map(m=>{
-      const r=residentFor(m)||{};
-      const info=dueInfo(m);
-      const label=info.type==="overdue"?`${info.days} day(s) overdue`:info.type==="today"?"Due today":`Due in ${info.days} day(s)`;
-      return `<div class="reminder-item">
-        <div><strong>${esc(r.name||"Unknown resident")}</strong><div class="small">DOB: ${esc(fmt(r.dob))}</div></div>
-        <div><button class="med-link edit-from-reminder" data-id="${m.id}" type="button">${esc(m.medication)}</button><div class="small">Rx ${esc(m.rxNumber||"—")} • ${esc(r.pharmacy||"")}</div></div>
-        <div><span class="badge badge-${info.type}">${label}</span><div class="small">${esc(fmt(info.next))}</div></div>
-        <button class="primary order-top" data-id="${m.id}" type="button">Ordered today</button>
-      </div>`;
-    }).join("");
-    document.querySelectorAll(".edit-from-reminder").forEach(b=>b.addEventListener("click",()=>editMedication(b.dataset.id)));
-    document.querySelectorAll(".order-top").forEach(b=>b.addEventListener("click",()=>markOrdered(b.dataset.id)));
-  }
-
-  function renderMedTable(){
-    const q=$("searchInput").value.trim().toLowerCase();
-    const filter=$("filterSelect").value;
-    let list=data.medications.filter(m=>{
-      const r=residentFor(m)||{};
-      const hay=[r.name,r.dob,r.pharmacy,r.phone,m.medication,m.rxNumber,m.notes].join(" ").toLowerCase();
-      if(q&&!hay.includes(q)) return false;
-      const info=dueInfo(m);
-      if(filter==="due"&&!["overdue","today"].includes(info.type)) return false;
-      if(filter==="soon"&&!["overdue","today","soon"].includes(info.type)) return false;
-      if(filter==="active"&&m.status!=="Active") return false;
-      if(filter==="followup"&&!["Ordered","In progress","Insurance issue","Ready for pickup"].includes(m.status)) return false;
-      if(filter==="insurance"&&m.status!=="Insurance issue") return false;
-      if(filter==="calllogs"&&!(m.callLogs||[]).length) return false;
-      if(filter==="inactive"&&m.status!=="Inactive") return false;
-      return true;
-    });
-
-    list.sort((a,b)=>{
-      const ad=dueInfo(a).next||"9999-12-31", bd=dueInfo(b).next||"9999-12-31";
-      const ar=residentFor(a)?.name||"", br=residentFor(b)?.name||"";
-      return ad.localeCompare(bd)||lastNameKey(ar).localeCompare(lastNameKey(br))||ar.localeCompare(br);
-    });
-
-    if(!list.length){
-      $("medTableBody").innerHTML='<tr><td colspan="8" class="empty">No matching medications.</td></tr>';
-      return;
+    .top-nav a:hover{
+      color:#fff;
+      background:rgba(40,30,20,.7);
     }
-
-    $("medTableBody").innerHTML=list.map(m=>{
-      const r=residentFor(m)||{};
-      const info=dueInfo(m);
-      const rowClass=(info.type==="overdue"?"due-overdue":info.type==="today"?"due-today":info.type==="soon"?"due-soon":"")+(m.urgentFlag?" urgent-row":"");
-      return `<tr class="${rowClass}">
-        <td><strong>${esc(r.name||"Unknown")}</strong><br><span class="small">${esc(fmt(r.dob))}</span></td>
-        <td><button class="med-link edit-med-name" data-id="${m.id}" type="button">${esc(m.medication)}</button><br><span class="small">${m.daysSupply?esc(m.daysSupply+" days supply"):""}</span><div class="quick-tags">${m.callFlag?'<span class="badge badge-soon" title="Call follow-up">☎</span>':''}${m.urgentFlag?'<span class="badge badge-overdue" title="Urgent flag">⚑</span>':''}</div></td>
-        <td>Rx ${esc(m.rxNumber||"—")}<br><span class="small">${esc(r.pharmacy||"")}<br>${esc(r.phone||"")}</span></td>
-        <td>${esc(fmt(m.lastOrderDate))}</td>
-        <td>${m.status==="Active"
-          ? `${esc(fmt(info.next))}<br><span class="small">${esc(m.reminderDays)} days after delivery</span>`
-          : `Follow up: ${esc(fmt(m.followUpDate)||"not set")}<br><span class="small">Ordered ${esc(fmt(m.orderPlacedDate)||"")}</span>`}</td>
-        <td>${esc(m.status)}</td>
-        <td>${esc(m.notes)}</td>
-        <td><div class="actions">
-          <button class="secondary edit-med" data-id="${m.id}" type="button">Edit / Log</button>
-          ${m.status==="Active"
-            ? `<button class="primary order-med" data-id="${m.id}" type="button">Ordered</button>`
-            : `<button class="quick-tag icon-tag toggle-call ${m.callFlag?'active':''}" title="Call follow-up" aria-label="Call follow-up" data-id="${m.id}" type="button">☎</button>
-               <button class="quick-tag icon-tag toggle-urgent ${m.urgentFlag?'active':''}" title="Urgent flag" aria-label="Urgent flag" data-id="${m.id}" type="button">⚑</button>
-               <button class="success delivered-med" data-id="${m.id}" type="button">Delivered</button>`}
-          <button class="danger delete-med" data-id="${m.id}" type="button">Delete</button>
-        </div></td>
-      </tr>`;
-    }).join("");
-
-    document.querySelectorAll(".edit-med").forEach(b=>b.addEventListener("click",()=>editMedication(b.dataset.id)));
-    document.querySelectorAll(".edit-med-name").forEach(b=>b.addEventListener("click",()=>editMedication(b.dataset.id)));
-    document.querySelectorAll(".order-med").forEach(b=>b.addEventListener("click",()=>markOrdered(b.dataset.id)));
-    document.querySelectorAll(".toggle-call").forEach(b=>b.addEventListener("click",()=>toggleFlag(b.dataset.id,"callFlag")));
-    document.querySelectorAll(".toggle-urgent").forEach(b=>b.addEventListener("click",()=>toggleFlag(b.dataset.id,"urgentFlag")));
-    document.querySelectorAll(".delivered-med").forEach(b=>b.addEventListener("click",()=>markDelivered(b.dataset.id)));
-    document.querySelectorAll(".delete-med").forEach(b=>b.addEventListener("click",()=>deleteMedication(b.dataset.id)));
-  }
-
-  function updatePatientFields(){
-    const r=data.residents.find(x=>x.id===$("patientSelect").value);
-    $("medDob").value=r?fmt(r.dob):"";
-    $("medPharmacy").value=r?.pharmacy||"";
-    $("medPhone").value=r?.phone||"";
-    $("patientInfo").textContent=r
-      ? `${r.name} • DOB ${fmt(r.dob)||"not entered"} • ${r.pharmacy||"No pharmacy entered"} • ${r.phone||"No phone entered"}`
-      : "Select a resident to automatically fill DOB and pharmacy information.";
-  }
-
-  function clearResidentForm(){
-    editingResidentId=null;
-    $("residentFormTitle").textContent="Add resident";
-    ["residentName","residentDob","residentPharmacy","residentPhone","residentNotes"].forEach(id=>$(id).value="");
-  }
-
-  function saveResident(){
-    const name=$("residentName").value.trim();
-    if(!name){alert("Please enter the patient name.");return;}
-    const record={
-      id:editingResidentId||crypto.randomUUID(),
-      name,
-      dob:$("residentDob").value,
-      pharmacy:$("residentPharmacy").value.trim(),
-      phone:$("residentPhone").value.trim(),
-      notes:$("residentNotes").value.trim()
-    };
-    const i=data.residents.findIndex(r=>r.id===record.id);
-    if(i>=0)data.residents[i]=record;else data.residents.push(record);
-    saveData();clearResidentForm();renderAll();
-  }
-
-  function editResident(id){
-    const r=data.residents.find(x=>x.id===id);if(!r)return;
-    editingResidentId=id;
-    $("residentFormTitle").textContent="Edit resident";
-    $("residentName").value=r.name;$("residentDob").value=r.dob;$("residentPharmacy").value=r.pharmacy;
-    $("residentPhone").value=r.phone;$("residentNotes").value=r.notes;
-    switchTab("residents");window.scrollTo({top:document.querySelector("#residentFormTitle").offsetTop-20,behavior:"smooth"});
-  }
-
-  function addMedForResident(id){
-    clearMedForm();
-    switchTab("medications");
-    $("patientSelect").value=id;updatePatientFields();$("medication").focus();
-  }
-
-  function deleteResident(id){
-    const r=data.residents.find(x=>x.id===id);if(!r)return;
-    const count=data.medications.filter(m=>m.residentId===id).length;
-    if(count){
-      alert(`This resident has ${count} medication record(s). Delete or reassign those medications first.`);
-      return;
-    }
-    if(!confirm(`Delete ${r.name}?`))return;
-    data.residents=data.residents.filter(x=>x.id!==id);saveData();renderAll();
-  }
-
-  function clearMedForm(){
-    editingMedId=null;
-    $("medFormTitle").textContent="Add medication";
-    $("patientSelect").value="";
-    ["medication","rxNumber","lastOrderDate","orderPlacedDate","followUpDate","daysSupply","medNotes"].forEach(id=>$(id).value="");
-    $("reminderDays").value=data.settings.defaultReminderDays;$("status").value="Active";
-    $("callLogText").value="";
-    $("callLogPanel").classList.add("hidden");
-    $("callLogList").innerHTML="";
-    updatePatientFields();
-  }
-
-  function saveMedication(){
-    const residentId=$("patientSelect").value;
-    const medication=$("medication").value.trim();
-    const lastOrderDate=$("lastOrderDate").value;
-    const reminderDays=Number($("reminderDays").value||0);
-    if(!residentId||!medication||!lastOrderDate||!reminderDays){
-      alert("Please select a patient and enter medication, last order date, and reminder days.");return;
-    }
-    const record={
-      id:editingMedId||crypto.randomUUID(),
-      residentId,medication,
-      rxNumber:$("rxNumber").value.trim(),
-      lastOrderDate,
-      orderPlacedDate:$("orderPlacedDate").value,
-      followUpDate:$("followUpDate").value,
-      callLogs: editingMedId ? (data.medications.find(m=>m.id===editingMedId)?.callLogs || []) : [],
-      paFlag: editingMedId ? Boolean(data.medications.find(m=>m.id===editingMedId)?.paFlag) : false,
-      callFlag: editingMedId ? Boolean(data.medications.find(m=>m.id===editingMedId)?.callFlag) : false,
-      urgentFlag: editingMedId ? Boolean(data.medications.find(m=>m.id===editingMedId)?.urgentFlag) : false,
-      reminderDays,
-      daysSupply:Number($("daysSupply").value||0),
-      status:$("status").value,
-      notes:$("medNotes").value.trim()
-    };
-    const i=data.medications.findIndex(m=>m.id===record.id);
-    if(i>=0)data.medications[i]=record;else data.medications.push(record);
-    saveData();clearMedForm();renderAll();
-  }
-
-  function editMedication(id){
-    const m=data.medications.find(x=>x.id===id);if(!m)return;
-    editingMedId=id;switchTab("medications");
-    $("medFormTitle").textContent="Edit medication";
-    $("patientSelect").value=m.residentId;$("medication").value=m.medication;$("rxNumber").value=m.rxNumber;
-    $("lastOrderDate").value=m.lastOrderDate;$("orderPlacedDate").value=m.orderPlacedDate||"";
-    $("followUpDate").value=m.followUpDate||"";$("reminderDays").value=m.reminderDays;
-    $("daysSupply").value=m.daysSupply||"";$("status").value=m.status;$("medNotes").value=m.notes;
-    updatePatientFields();
-    renderCallLogs();
-    $("callLogPanel").classList.remove("hidden");
-    window.scrollTo({top:document.querySelector("#medFormTitle").offsetTop-20,behavior:"smooth"});
-  }
-
-
-  function formatDateTime(value){
-    if(!value) return "";
-    const d=new Date(value);
-    return d.toLocaleString();
-  }
-
-  function renderCallLogs(){
-    const m=data.medications.find(x=>x.id===editingMedId);
-    if(!m){
-      $("callLogPanel").classList.add("hidden");
-      $("callLogList").innerHTML="";
-      return;
-    }
-    $("callLogPanel").classList.remove("hidden");
-    const logs=[...(m.callLogs||[])].sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
-    if(!logs.length){
-      $("callLogList").innerHTML='<div class="empty" style="margin-top:8px">No call log entries yet.</div>';
-      return;
-    }
-    $("callLogList").innerHTML=logs.map(log=>`
-      <div class="log-entry">
-        <div class="log-entry-header">
-          <strong>${esc(formatDateTime(log.createdAt))}</strong>
-          <button class="danger delete-log" data-id="${log.id}" type="button">Delete</button>
-        </div>
-        <div class="log-text">${esc(log.text)}</div>
-      </div>`).join("");
-    document.querySelectorAll(".delete-log").forEach(b=>b.addEventListener("click",()=>deleteCallLog(b.dataset.id)));
-  }
-
-  function addCallLog(){
-    const m=data.medications.find(x=>x.id===editingMedId);
-    if(!m){
-      alert("Please save the medication first, then open Edit / Log.");
-      return;
-    }
-    const note=$("callLogText").value.trim();
-    if(!note){
-      alert("Please type a call log note.");
-      return;
-    }
-    m.callLogs=m.callLogs||[];
-    m.callLogs.push({
-      id:crypto.randomUUID(),
-      createdAt:new Date().toISOString(),
-      text:note
-    });
-    $("callLogText").value="";
-    saveData();
-    renderCallLogs();
-  }
-
-  function deleteCallLog(logId){
-    const m=data.medications.find(x=>x.id===editingMedId);
-    if(!m)return;
-    const log=(m.callLogs||[]).find(x=>x.id===logId);
-    if(!log)return;
-    if(!confirm("Delete this call log entry?"))return;
-    m.callLogs=(m.callLogs||[]).filter(x=>x.id!==logId);
-    saveData();
-    renderCallLogs();
-  }
-
-  function markOrdered(id){
-    const m=data.medications.find(x=>x.id===id);if(!m)return;
-    m.orderPlacedDate=todayStr();
-    const dt=new Date();dt.setDate(dt.getDate()+2);
-    m.followUpDate=todayStr(dt);
-    m.status="Ordered";
-    saveData();renderAll();
-  }
-
-
-
-
-  function toggleFlag(id,key){
-    const m=data.medications.find(x=>x.id===id);if(!m)return;
-    m[key]=!m[key];
-    saveData();renderAll();
-  }
-
-  function markDelivered(id){
-    const m=data.medications.find(x=>x.id===id);if(!m)return;
-    m.lastOrderDate=todayStr();
-    m.orderPlacedDate="";
-    m.followUpDate="";
-    m.paFlag=false;
-    m.callFlag=false;
-    m.urgentFlag=false;
-    m.status="Active";
-    saveData();renderAll();
-  }
-
-  function deleteMedication(id){
-    const m=data.medications.find(x=>x.id===id);if(!m)return;
-    const r=residentFor(m);
-    if(!confirm(`Delete ${r?.name||"resident"} - ${m.medication}?`))return;
-    data.medications=data.medications.filter(x=>x.id!==id);saveData();renderAll();
-  }
-
-  function exportBackup(){
-    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-    const url=URL.createObjectURL(blob),a=document.createElement("a");
-    a.href=url;a.download=`medication-reminder-backup-${todayStr()}.json`;a.click();URL.revokeObjectURL(url);
-  }
-
-  function importBackup(file){
-    const reader=new FileReader();
-    reader.onload=()=>{
-      try{
-        const imported=JSON.parse(reader.result);
-        if(!imported||!Array.isArray(imported.residents)||!Array.isArray(imported.medications))throw new Error();
-        if(!confirm(`Replace current data with ${imported.residents.length} residents and ${imported.medications.length} medications?`))return;
-        data=imported;
-        data.settings={defaultReminderDays:Number(data.settings?.defaultReminderDays||23)};
-        data.residents=(data.residents||[]).map(r=>({...r}));
-        data.medications=(data.medications||[]).map(m=>({...m,callLogs:Array.isArray(m.callLogs)?m.callLogs:[],paFlag:Boolean(m.paFlag),callFlag:Boolean(m.callFlag),urgentFlag:Boolean(m.urgentFlag)}));
-        saveData();clearResidentForm();clearMedForm();renderAll();
-      }catch(e){alert("This backup file could not be read.");}
-    };
-    reader.readAsText(file);
-  }
-
-  $("residentTabBtn").addEventListener("click",()=>switchTab("residents"));
-  $("medTabBtn").addEventListener("click",()=>switchTab("medications"));
-  $("saveResidentBtn").addEventListener("click",saveResident);
-  $("clearResidentBtn").addEventListener("click",clearResidentForm);
-  $("saveMedBtn").addEventListener("click",saveMedication);
-  $("clearMedBtn").addEventListener("click",clearMedForm);
-  $("addCallLogBtn").addEventListener("click",addCallLog);
-  $("patientSelect").addEventListener("change",updatePatientFields);
-  $("searchInput").addEventListener("input",renderMedTable);
-  $("filterSelect").addEventListener("change",renderMedTable);
-  $("exportBtn").addEventListener("click",exportBackup);
-  $("importBtn").addEventListener("click",()=>$("importFile").click());
-  $("importFile").addEventListener("change",e=>{if(e.target.files[0])importBackup(e.target.files[0]);e.target.value="";});
-
-  $("filterSelect").value="all";
-  renderAll();
-})();
-</script>
+</style>
+</meta></meta></meta></meta></head>
+<body><nav aria-label="Site" class="top-nav"><a href="about.html">About</a></nav>
+<div aria-labelledby="appGuideTitle" aria-modal="true" class="app-guide-overlay" id="appGuideOverlay" role="dialog">
+<div class="app-guide-card">
+<h2 id="appGuideTitle">Use Vintage Clock Like an App</h2>
+<p id="appGuideIntro">On iPhone or iPad, add this clock to your Home Screen to hide Safari's tabs and address bar.</p>
+<ol class="app-guide-steps" id="appGuideSteps">
+<li>Open this page in <strong>Safari</strong>.</li>
+<li>Tap the <strong>Share</strong> button.</li>
+<li>Choose <strong>Add to Home Screen</strong>.</li>
+<li>Turn on <strong>Open as Web App</strong>, then tap <strong>Add</strong>.</li>
+<li>Open Vintage Clock from its new Home Screen icon.</li>
+</ol>
+<p class="app-guide-note" id="appGuideNote">Your clock will open in its own app-style window. The iPhone status bar may still remain visible.</p>
+<button id="closeAppGuideButton" type="button">Got It</button>
+</div>
+</div>
+<main class="clock-stage">
+<div aria-label="Analog clock" class="clock-shell">
+<div class="clock-face" id="clockFace">
+<div class="default-dial" id="defaultDial"></div>
+<img alt="Uploaded clock face" class="dial-image" id="dialImage"/>
+<div aria-hidden="true" class="number-overlay" id="numberOverlay"></div>
+<div class="brand" id="brand">Vintage Clock</div>
+<div class="hands-layer">
+<div class="rotating-hand hour-hand" id="hourHand"></div>
+<div class="rotating-hand minute-hand" id="minuteHand"></div>
+<div class="rotating-hand second-hand" id="secondHand"></div>
+</div>
+<div class="center-cap"></div>
+<div class="crosshair"></div>
+</div>
+</div>
+</main>
+<aside class="panel">
+<h1>Vintage Clock Workshop</h1>
+<p class="subtitle">Restore, align, and customize a clock face directly in your browser.</p><div style="margin:0 0 18px;padding:12px;border:1px solid rgba(200,169,107,.25);border-radius:10px;background:rgba(200,169,107,.08);font-size:13px;line-height:1.6;color:#f4ebdf;"><strong>Create your own beautiful vintage clock.</strong><br/>Upload an antique dial, customize elegant hands, add classic numerals, and enjoy authentic clock chimes.<br/><br/>Install Vintage Clock on your tablet, phone, or computer and transform it into a beautiful full-screen vintage clock.</div>
+<section class="control-group">
+<label for="builtInFaceSelect">Built-in Clock Faces</label>
+<select id="builtInFaceSelect">
+<option value="default">Default Roman Dial</option>
+<option value="faces/classic-cream.png">Classic Cream</option>
+<option value="faces/aged-brass.png">Aged Brass</option>
+<option value="faces/dark-victorian.png">Dark Victorian</option>
+<option value="faces/railway-station.png">Railway Station</option>
+<option value="faces/art-deco.png">Art Deco (1930s)</option>
+<option value="faces/tiffany.png">Tiffany</option>
+<option value="faces/french-enamel.png">French Enamel</option>
+<option value="faces/black-forest.png">Black Forest</option>
+<option value="faces/skeleton-clock.png">Skeleton Clock</option>
+<option value="faces/steampunk.png">Steampunk</option>
+<option value="faces/pocket-watch.png">Pocket Watch</option>
+<option value="faces/vienna-regulator.png">Vienna Regulator</option>
+</select>
+<label for="imagePicker" style="margin-top:14px;">Upload Your Own Clock Face</label>
+<input accept="image/*" id="imagePicker" type="file"/>
+<div style="margin-top:8px;">
+<button id="removeImageButton" type="button">Use Default Dial</button>
+</div>
+<div class="status" id="imageStatus">Using the default Roman dial.</div>
+</section>
+<section class="control-group">
+<div class="group-title">Image Alignment</div>
+<button id="adjustButton" type="button">Start Drag Adjustment</button>
+<p class="instruction">Drag the dial with a mouse or finger and align its center hole with the red crosshair.</p>
+<div class="slider-row">
+<div class="slider-header"><span>Image Size</span><span class="slider-value" id="zoomValue">100%</span></div>
+<input id="zoomSlider" max="220" min="40" step="1" type="range" value="100"/>
+</div>
+<div class="slider-row">
+<div class="slider-header"><span>Move Left / Right</span><span class="slider-value" id="xValue">0</span></div>
+<input id="xSlider" max="300" min="-300" step="1" type="range" value="0"/>
+</div>
+<div class="slider-row">
+<div class="slider-header"><span>Move Up / Down</span><span class="slider-value" id="yValue">0</span></div>
+<input id="ySlider" max="300" min="-300" step="1" type="range" value="0"/>
+</div>
+<div class="button-row">
+<button id="centerImageButton" type="button">Center Image</button>
+<button id="resetImageButton" type="button">Reset All</button>
+</div>
+</section>
+<section class="control-group">
+<div class="group-title">Dial Numbers</div>
+<label for="numberStyleSelect">Number Style</label>
+<select id="numberStyleSelect">
+<option value="none">No Numbers</option>
+<option value="arabic">Arabic Numbers (1–12)</option>
+<option value="roman">Roman Numerals (I–XII)</option>
+<option value="roman-clock">Clock Roman Numerals (IIII)</option>
+<option value="cardinal">12, 3, 6, 9 Only</option>
+</select>
+<label for="numberFontSelect" style="margin-top:12px;">Number Font</label>
+<select id="numberFontSelect">
+<option value='Georgia, "Times New Roman", serif'>Traditional Serif</option>
+<option value='"Times New Roman", Times, serif'>Classic Roman</option>
+<option value='Garamond, "Palatino Linotype", serif'>Old Style</option>
+<option value='"Arial Narrow", Arial, sans-serif'>Clean Narrow</option>
+<option value="Arial, Helvetica, sans-serif">Modern Sans</option>
+</select>
+<div class="slider-row">
+<div class="slider-header"><span>Number Size</span><span class="slider-value" id="numberSizeValue">100%</span></div>
+<input id="numberSizeSlider" max="180" min="55" step="1" type="range" value="100"/>
+</div>
+<div class="slider-row">
+<div class="slider-header"><span>Distance from Center</span><span class="slider-value" id="numberRadiusValue">100%</span></div>
+<input id="numberRadiusSlider" max="125" min="65" step="1" type="range" value="100"/>
+</div>
+<label for="numberColor">Number Color</label>
+<input id="numberColor" type="color" value="#21150d"/>
+<button id="resetNumbersButton" style="margin-top:8px;" type="button">Reset Dial Numbers</button>
+<p class="instruction">Numbers stay fixed to the clock and do not move or zoom with the uploaded image.</p>
+</section>
+<section class="control-group">
+<div class="group-title">Clock Hands</div>
+<select aria-label="Hand style" id="handStyleSelect">
+<option value="classic-spade">Classic Spade</option>
+<option value="victorian">Victorian</option>
+<option value="gothic-fleur">Gothic Fleur</option>
+<option value="moon-spade">Moon Spade</option>
+<option value="modern-minimal">Modern Minimal</option>
+<option value="slim-line">Slim Line</option>
+<option value="tapered-modern">Tapered Modern</option>
+<option value="bauhaus">Bauhaus</option>
+</select>
+<div class="preview-grid" id="handPreviewGrid"></div>
+<div class="slider-row">
+<div class="slider-header"><span>Hand Size</span><span class="slider-value" id="handSizeValue">100%</span></div>
+<input id="handSizeSlider" max="135" min="70" step="1" type="range" value="100"/>
+</div>
+<label for="secondHandStyleSelect">Second Hand Style</label>
+<select id="secondHandStyleSelect">
+<option value="classic">Classic Ornament</option>
+<option value="straight">Straight</option>
+<option value="needle">Needle Tip</option>
+<option value="diamond">Diamond Tip</option>
+<option value="counterweight">Counterweight</option>
+<option value="minimal">Minimal</option>
+</select>
+<div class="slider-row">
+<div class="slider-header"><span>Second Hand Length</span><span class="slider-value" id="secondHandLengthValue">100%</span></div>
+<input id="secondHandLengthSlider" max="145" min="70" step="1" type="range" value="100"/>
+</div>
+<div class="slider-row">
+<div class="slider-header"><span>Second Hand Width</span><span class="slider-value" id="secondHandWidthValue">100%</span></div>
+<input id="secondHandWidthSlider" max="220" min="50" step="5" type="range" value="100"/>
+</div>
+<div class="slider-row">
+<div class="slider-header"><span>Second Hand Tail</span><span class="slider-value" id="secondHandTailValue">100%</span></div>
+<input id="secondHandTailSlider" max="200" min="0" step="5" type="range" value="100"/>
+</div>
+<label class="switch-row">
+<span>Show Second Hand</span>
+<input checked="" id="secondHandToggle" type="checkbox"/>
+</label>
+<div class="color-grid">
+<div>
+<label for="handColor">Hands</label>
+<input id="handColor" type="color" value="#171411"/>
+</div>
+<div>
+<label for="centerColor">Center</label>
+<input id="centerColor" type="color" value="#b98a42"/>
+</div>
+<div>
+<label for="secondColor">Second</label>
+<input id="secondColor" type="color" value="#8d211d"/>
+</div>
+</div>
+<button id="resetHandsButton" style="margin-top:8px;" type="button">Reset Hand Style</button>
+</section>
+<section class="control-group">
+<div class="group-title">Display</div>
+<label class="switch-row">
+<span>Show Dial Brand Text</span>
+<input checked="" id="brandToggle" type="checkbox"/>
+</label>
+<button id="fullscreenButton" type="button">Enter Fullscreen</button>
+<div class="status-text" id="appModeHint" style="margin-top:8px;"></div>
+<button id="hideControlsButton" style="margin-top:8px;" type="button">Hide Controls</button>
+</section>
+<section class="control-group">
+<div class="group-title">Chime</div>
+<label class="switch-row">
+<span>Enable Hourly Chime</span>
+<input id="chimeToggle" type="checkbox"/>
+</label>
+<label for="chimeSoundSelect">Chime Sound</label>
+<select id="chimeSoundSelect">
+<optgroup label="Cuckoo Clock">
+<option value="chimes/cuckoo01.mp3">Cuckoo Clock I</option>
+<option value="chimes/cuckoo02.mp3">Cuckoo Clock II</option>
+</optgroup>
+<optgroup label="Grandfather Clock">
+<option value="chimes/grandfather01.mp3">Grandfather Clock I</option>
+<option value="chimes/grandfather02.mp3">Grandfather Clock II</option>
+<option value="chimes/grandfather03.mp3">Grandfather Clock III</option>
+</optgroup>
+<optgroup label="Temple Bell">
+<option value="chimes/temple01.mp3">Temple Bell I</option>
+<option value="chimes/temple02.mp3">Temple Bell II</option>
+<option value="chimes/temple03.mp3">Temple Bell III</option>
+<option value="chimes/temple04.mp3">Temple Bell IV</option>
+</optgroup>
+<optgroup label="Westminster">
+<option value="chimes/westminster01.mp3">Westminster I</option>
+<option value="chimes/westminster02.mp3">Westminster II</option>
+<option value="chimes/westminster03.mp3">Westminster III</option>
+<option value="chimes/westminster04.mp3">Westminster IV</option>
+</optgroup>
+<optgroup label="Custom">
+<option disabled="" id="customChimeOption" value="custom">Uploaded Custom Chime</option>
+</optgroup>
+</select>
+<label for="repeatCountSelect" style="margin-top:12px;">Repeat Count</label>
+<select id="repeatCountSelect">
+<option value="1">Once</option>
+<option value="2">Twice</option>
+<option value="4">Four Times</option>
+<option value="hour">Current Hour</option>
+</select>
+<div class="slider-row">
+<div class="slider-header">
+<span>Strike Spacing</span>
+<span class="slider-value" id="strikeSpacingValue">2.5 sec</span>
+</div>
+<input id="strikeSpacingSlider" max="8" min="0.5" step="0.1" type="range" value="2.5"/>
+<div class="instruction">Shorter spacing overlaps the ringing tail; longer spacing lets each strike fade.</div>
+</div>
+<div class="slider-row">
+<div class="slider-header">
+<span>Sound Tail</span>
+<span class="slider-value" id="soundTailValue">30.0 sec</span>
+</div>
+<input id="soundTailSlider" max="30" min="0.5" step="0.1" type="range" value="30"/>
+<div class="instruction">Shortens a long recording with a gentle fade. It cannot extend the original recording.</div>
+<div class="instruction" id="westminsterRecommendation" style="display:none; margin-top:6px;">🕰 Recommended: Once / 30 sec</div>
+</div>
+<label for="customChimePicker" style="margin-top:12px;">Upload Custom Chime</label>
+<input accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg" id="customChimePicker" type="file"/>
+<div class="instruction">Maximum duration: 15 seconds. The uploaded sound is stored locally on this device.</div>
+<div class="button-row" style="margin-top:10px;">
+<button id="testChimeButton" type="button">Preview</button>
+<button id="stopChimeButton" type="button">Stop</button>
+</div>
+<div class="status" id="audioStatus">Sound is off.</div>
+</section>
+<section class="control-group">
+<div class="group-title">Quiet Hours</div>
+<label class="switch-row">
+<span>Enable Quiet Hours</span>
+<input checked="" id="quietToggle" type="checkbox"/>
+</label>
+<div class="quiet-grid">
+<div>
+<label for="quietStart">Start</label>
+<input id="quietStart" type="time" value="22:00"/>
+</div>
+<div>
+<label for="quietEnd">End</label>
+<input id="quietEnd" type="time" value="07:00"/>
+</div>
+</div>
+</section>
+<section class="control-group" id="saveClockSection">
+<div class="group-title">My Clock</div>
+<div class="button-row">
+<button id="saveClockButton" type="button">Save My Clock</button>
+<button id="resetDefaultButton" type="button">Reset to Default</button>
+</div>
+<div class="status" id="saveClockStatus">Changes are saved automatically on this device.</div>
+<p class="instruction" style="margin-top:10px;">Your uploaded clock images and sounds are stored locally on your device and are not uploaded to a server.</p>
+</section>
+<section class="control-group">
+<div style="text-align:center;line-height:1.7;font-size:13px;">
+<p style="font-size:18px;">❤️</p>
+<p><strong>Made with love for antique clock lovers.</strong></p>
+<p>If Vintage Clock brings a little joy to your home,<br/>please consider supporting future development.</p>
+<p><a href="https://buymeacoffee.com/vintageclock" style="display:inline-block;padding:10px 18px;background:#6f4e37;color:white;text-decoration:none;border-radius:999px;font-weight:bold;" target="_blank">☕ Buy Me a Coffee</a></p>
+<p style="color:#c8b9a8;">Thank you for helping keep this project alive.</p>
+<p style="font-size:11px;color:#9f927f;">Clock chime sounds include royalty-free audio by <a href="https://otologic.jp/" target="_blank">OtoLogic</a>.</p>
+</div>
+</section></aside>
+<div class="floating-controls">
+<button id="showControlsButton" type="button">Show Controls</button>
+</div>
 <script>
-if ("serviceWorker" in navigator) {
-  let waitingWorker=null;
-  const showUpdate=worker=>{
-    waitingWorker=worker;
-    document.getElementById("updateBanner")?.classList.add("show");
-  };
+    "use strict";
+
+    const handStyles = {
+      "classic-spade": {
+        label: "Classic Spade",
+        hour: `<svg viewBox="0 0 100 240"><path class="hand-fill" d="M50 225 C41 213 36 194 37 172 L39 98 C27 83 20 66 24 48 C28 28 42 9 50 0 C58 9 72 28 76 48 C80 66 73 83 61 98 L63 172 C64 194 59 213 50 225 Z"/></svg>`,
+        minute: `<svg viewBox="0 0 100 320"><path class="hand-fill" d="M50 305 C42 290 39 267 40 244 L42 110 C31 94 25 76 28 56 C31 34 43 12 50 0 C57 12 69 34 72 56 C75 76 69 94 58 110 L60 244 C61 267 58 290 50 305 Z"/></svg>`
+      },
+      "victorian": {
+        label: "Victorian",
+        hour: `<svg viewBox="0 0 100 240"><path class="hand-fill" d="M50 225 C43 209 41 192 43 172 L45 137 C31 129 20 117 19 101 C30 108 39 108 46 100 C35 84 34 64 42 47 C45 40 48 32 50 20 C52 32 55 40 58 47 C66 64 65 84 54 100 C61 108 70 108 81 101 C80 117 69 129 55 137 L57 172 C59 192 57 209 50 225 Z"/></svg>`,
+        minute: `<svg viewBox="0 0 100 320"><path class="hand-fill" d="M50 305 C43 288 42 267 44 243 L46 164 C31 154 21 141 20 124 C32 132 41 131 47 121 C36 101 36 78 43 57 C46 47 49 32 50 10 C51 32 54 47 57 57 C64 78 64 101 53 121 C59 131 68 132 80 124 C79 141 69 154 54 164 L56 243 C58 267 57 288 50 305 Z"/></svg>`
+      },
+      "gothic-fleur": {
+        label: "Gothic Fleur",
+        hour: `<svg viewBox="0 0 100 240"><path class="hand-fill" d="M50 225 L43 177 L45 145 C34 138 28 127 29 114 C35 121 42 121 47 113 C36 94 37 72 46 52 L50 12 L54 52 C63 72 64 94 53 113 C58 121 65 121 71 114 C72 127 66 138 55 145 L57 177 Z"/></svg>`,
+        minute: `<svg viewBox="0 0 100 320"><path class="hand-fill" d="M50 305 L43 249 L45 182 C34 174 27 161 29 146 C36 154 43 154 48 145 C36 123 37 97 46 72 L50 8 L54 72 C63 97 64 123 52 145 C57 154 64 154 71 146 C73 161 66 174 55 182 L57 249 Z"/></svg>`
+      },
+      "moon-spade": {
+        label: "Moon Spade",
+        hour: `<svg viewBox="0 0 100 240"><path class="hand-fill" d="M50 225 L43 170 L45 110 C31 91 27 67 36 46 C42 31 47 17 50 0 C53 17 58 31 64 46 C73 67 69 91 55 110 L57 170 Z"/><circle class="hand-cutout" cx="50" cy="82" r="14"/></svg>`,
+        minute: `<svg viewBox="0 0 100 320"><path class="hand-fill" d="M50 305 L43 244 L45 124 C32 104 28 78 37 54 C42 38 47 20 50 0 C53 20 58 38 63 54 C72 78 68 104 55 124 L57 244 Z"/><circle class="hand-cutout" cx="50" cy="93" r="15"/></svg>`
+      },
+      "modern-minimal": {
+        label: "Modern Minimal",
+        hour: `<svg viewBox="0 0 100 240"><path class="hand-fill" d="M40 225 L40 18 L60 0 L60 225 Z"/></svg>`,
+        minute: `<svg viewBox="0 0 100 320"><path class="hand-fill" d="M43 305 L43 12 L57 0 L57 305 Z"/></svg>`
+      },
+      "slim-line": {
+        label: "Slim Line",
+        hour: `<svg viewBox="0 0 100 240"><path class="hand-fill" d="M47 225 L47 8 L53 0 L53 225 Z"/></svg>`,
+        minute: `<svg viewBox="0 0 100 320"><path class="hand-fill" d="M48 305 L48 4 L52 0 L52 305 Z"/></svg>`
+      },
+      "tapered-modern": {
+        label: "Tapered Modern",
+        hour: `<svg viewBox="0 0 100 240"><path class="hand-fill" d="M43 225 L34 60 L50 0 L66 60 L57 225 Z"/></svg>`,
+        minute: `<svg viewBox="0 0 100 320"><path class="hand-fill" d="M45 305 L38 68 L50 0 L62 68 L55 305 Z"/></svg>`
+      },
+      "bauhaus": {
+        label: "Bauhaus",
+        hour: `<svg viewBox="0 0 100 240"><path class="hand-fill" fill-rule="evenodd" d="M38 225 L32 40 L50 0 L68 40 L62 225 Z M44 187 L56 187 L58 62 L50 40 L42 62 Z"/></svg>`,
+        minute: `<svg viewBox="0 0 100 320"><path class="hand-fill" fill-rule="evenodd" d="M40 305 L35 45 L50 0 L65 45 L60 305 Z M46 267 L54 267 L56 63 L50 38 L44 63 Z"/></svg>`
+      }
+    };
+
+    const secondHandMarkup = `
+      <div class="second-hand-shaft"><span class="second-hand-tip"></span></div>
+      <div class="second-hand-tail"></div>`;
+
+    const romanNumerals = ["XII","I","II","III","IV","V","VI","VII","VIII","IX","X","XI"];
+    const overlayRomanNumerals = ["XII","I","II","III","IV","V","VI","VII","VIII","IX","X","XI"];
+    const overlayClockRomanNumerals = ["XII","I","II","III","IIII","V","VI","VII","VIII","IX","X","XI"];
+    const overlayArabicNumbers = ["12","1","2","3","4","5","6","7","8","9","10","11"];
+    const defaultDial = document.getElementById("defaultDial");
+    const numberOverlay = document.getElementById("numberOverlay");
+
+    for (let i = 0; i < 60; i += 1) {
+      const mark = document.createElement("div");
+      mark.className = "minute-mark" + (i % 5 === 0 ? " major" : "");
+      mark.style.setProperty("--i", i);
+      defaultDial.appendChild(mark);
+    }
+
+    romanNumerals.forEach((value, index) => {
+      const numeral = document.createElement("div");
+      numeral.className = "numeral";
+      numeral.style.setProperty("--i", index);
+      numeral.textContent = value;
+      defaultDial.appendChild(numeral);
+    });
+
+    const clockFace = document.getElementById("clockFace");
+    const hourHand = document.getElementById("hourHand");
+    const minuteHand = document.getElementById("minuteHand");
+    const secondHand = document.getElementById("secondHand");
+    const brand = document.getElementById("brand");
+
+    const builtInFaceSelect = document.getElementById("builtInFaceSelect");
+    const imagePicker = document.getElementById("imagePicker");
+    const dialImage = document.getElementById("dialImage");
+    const removeImageButton = document.getElementById("removeImageButton");
+    const imageStatus = document.getElementById("imageStatus");
+
+    const adjustButton = document.getElementById("adjustButton");
+    const zoomSlider = document.getElementById("zoomSlider");
+    const xSlider = document.getElementById("xSlider");
+    const ySlider = document.getElementById("ySlider");
+    const zoomValue = document.getElementById("zoomValue");
+    const xValue = document.getElementById("xValue");
+    const yValue = document.getElementById("yValue");
+    const centerImageButton = document.getElementById("centerImageButton");
+    const resetImageButton = document.getElementById("resetImageButton");
+
+    const numberStyleSelect = document.getElementById("numberStyleSelect");
+    const numberFontSelect = document.getElementById("numberFontSelect");
+    const numberSizeSlider = document.getElementById("numberSizeSlider");
+    const numberSizeValue = document.getElementById("numberSizeValue");
+    const numberRadiusSlider = document.getElementById("numberRadiusSlider");
+    const numberRadiusValue = document.getElementById("numberRadiusValue");
+    const numberColor = document.getElementById("numberColor");
+    const resetNumbersButton = document.getElementById("resetNumbersButton");
+
+    const handStyleSelect = document.getElementById("handStyleSelect");
+    const handPreviewGrid = document.getElementById("handPreviewGrid");
+    const handSizeSlider = document.getElementById("handSizeSlider");
+    const handSizeValue = document.getElementById("handSizeValue");
+    const secondHandStyleSelect = document.getElementById("secondHandStyleSelect");
+    const secondHandLengthSlider = document.getElementById("secondHandLengthSlider");
+    const secondHandLengthValue = document.getElementById("secondHandLengthValue");
+    const secondHandWidthSlider = document.getElementById("secondHandWidthSlider");
+    const secondHandWidthValue = document.getElementById("secondHandWidthValue");
+    const secondHandTailSlider = document.getElementById("secondHandTailSlider");
+    const secondHandTailValue = document.getElementById("secondHandTailValue");
+    const secondHandToggle = document.getElementById("secondHandToggle");
+    const handColor = document.getElementById("handColor");
+    const centerColor = document.getElementById("centerColor");
+    const secondColor = document.getElementById("secondColor");
+    const resetHandsButton = document.getElementById("resetHandsButton");
+
+    const brandToggle = document.getElementById("brandToggle");
+    const fullscreenButton = document.getElementById("fullscreenButton");
+    const appGuideOverlay = document.getElementById("appGuideOverlay");
+    const closeAppGuideButton = document.getElementById("closeAppGuideButton");
+    const appModeHint = document.getElementById("appModeHint");
+    const appGuideIntro = document.getElementById("appGuideIntro");
+    const appGuideSteps = document.getElementById("appGuideSteps");
+    const appGuideNote = document.getElementById("appGuideNote");
+    const hideControlsButton = document.getElementById("hideControlsButton");
+    const showControlsButton = document.getElementById("showControlsButton");
+
+    const chimeToggle = document.getElementById("chimeToggle");
+    const chimeSoundSelect = document.getElementById("chimeSoundSelect");
+    const repeatCountSelect = document.getElementById("repeatCountSelect");
+    const strikeSpacingSlider = document.getElementById("strikeSpacingSlider");
+    const strikeSpacingValue = document.getElementById("strikeSpacingValue");
+    const soundTailSlider = document.getElementById("soundTailSlider");
+    const soundTailValue = document.getElementById("soundTailValue");
+    const westminsterRecommendation = document.getElementById("westminsterRecommendation");
+    const customChimePicker = document.getElementById("customChimePicker");
+    const customChimeOption = document.getElementById("customChimeOption");
+    const testChimeButton = document.getElementById("testChimeButton");
+    const stopChimeButton = document.getElementById("stopChimeButton");
+    const audioStatus = document.getElementById("audioStatus");
+    const quietToggle = document.getElementById("quietToggle");
+    const quietStart = document.getElementById("quietStart");
+    const quietEnd = document.getElementById("quietEnd");
+    const saveClockButton = document.getElementById("saveClockButton");
+    const resetDefaultButton = document.getElementById("resetDefaultButton");
+    const saveClockStatus = document.getElementById("saveClockStatus");
+
+    let uploadedImageUrl = "";
+    let imageFitMode = "contain";
+    let imageZoom = 1;
+    let imageX = 0;
+    let imageY = 0;
+    let isAdjusting = false;
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let dragOriginX = 0;
+    let dragOriginY = 0;
+
+    let numberStyle = "none";
+    let numberSize = 1;
+    let numberRadius = 1;
+
+    let selectedHandStyle = "classic-spade";
+    let handScale = 1;
+    let secondHandStyle = "classic";
+    let secondHandLength = 1;
+    let secondHandWidth = 1;
+    let secondHandTail = 1;
+    let lastChimedHourKey = "";
+    let customChimeUrl = "";
+    let customChimeName = "";
+    let currentImageKind = "default";
+    let currentImagePath = "";
+    let currentImageName = "";
+    let currentImageBlob = null;
+    let currentChimeBlob = null;
+    let isRestoringClock = false;
+    let autoSaveTimer = null;
+    const CLOCK_SETTINGS_KEY = "vintageClockSavedClockV1";
+    const CLOCK_DB_NAME = "VintageClockStorage";
+    const CLOCK_DB_VERSION = 1;
+    const CLOCK_MEDIA_STORE = "media";
+    const activeChimeAudios = new Set();
+    const chimeTimers = new Set();
+    let audioContext = null;
+
+    function renderDialNumbers() {
+      numberOverlay.innerHTML = "";
+
+      let values = [];
+      if (numberStyle === "arabic") {
+        values = overlayArabicNumbers;
+      } else if (numberStyle === "roman") {
+        values = overlayRomanNumerals;
+      } else if (numberStyle === "roman-clock") {
+        values = overlayClockRomanNumerals;
+      } else if (numberStyle === "cardinal") {
+        values = ["12", "", "", "3", "", "", "6", "", "", "9", "", ""];
+      }
+
+      values.forEach((value, index) => {
+        if (!value) return;
+        const numeral = document.createElement("div");
+        numeral.className = "overlay-number";
+        numeral.style.setProperty("--i", index);
+        numeral.textContent = value;
+        numberOverlay.appendChild(numeral);
+      });
+
+      applyDialNumberSettings();
+    }
+
+    function applyDialNumberSettings() {
+      const sizeVmin = 3.6 * numberSize;
+      const radiusPercent = 360 * numberRadius;
+      numberOverlay.style.setProperty(
+        "--overlay-number-size",
+        `clamp(14px, ${sizeVmin.toFixed(2)}vmin, 72px)`
+      );
+      numberOverlay.style.setProperty("--overlay-number-radius", `${radiusPercent}%`);
+      numberOverlay.style.setProperty("--overlay-number-color", numberColor.value);
+      numberOverlay.style.setProperty("--overlay-number-font", numberFontSelect.value);
+      numberSizeValue.textContent = `${Math.round(numberSize * 100)}%`;
+      numberRadiusValue.textContent = `${Math.round(numberRadius * 100)}%`;
+    }
+
+    function renderHands() {
+      const style = handStyles[selectedHandStyle];
+      hourHand.innerHTML = style.hour;
+      minuteHand.innerHTML = style.minute;
+      secondHand.innerHTML = secondHandMarkup;
+      secondHand.className = `rotating-hand second-hand second-style-${secondHandStyle}`;
+      applyHandScale();
+      updateHandSelectionUI();
+    }
+
+    function renderHandPreviews() {
+      handPreviewGrid.innerHTML = "";
+
+      Object.entries(handStyles).forEach(([key, style]) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "hand-card";
+        card.dataset.style = key;
+        card.innerHTML = `
+          <svg viewBox="0 0 180 90" aria-hidden="true">
+            <g transform="translate(55,82) scale(.25) translate(-50,-225)">${style.hour.replace(/<svg[^>]*>|<\/svg>/g, "")}</g>
+            <g transform="translate(125,82) scale(.19) translate(-50,-305)">${style.minute.replace(/<svg[^>]*>|<\/svg>/g, "")}</g>
+            <circle cx="55" cy="82" r="5" fill="var(--center-color)"/>
+            <circle cx="125" cy="82" r="5" fill="var(--center-color)"/>
+          </svg>
+          <span>${style.label}</span>`;
+        card.addEventListener("click", () => {
+          selectedHandStyle = key;
+          handStyleSelect.value = key;
+          renderHands();
+        });
+        handPreviewGrid.appendChild(card);
+      });
+
+      updateHandSelectionUI();
+    }
+
+    function updateHandSelectionUI() {
+      document.querySelectorAll(".hand-card").forEach(card => {
+        card.classList.toggle("selected", card.dataset.style === selectedHandStyle);
+      });
+    }
+
+    function applyHandScale() {
+      const scale = handScale;
+      hourHand.style.scale = `${scale}`;
+      minuteHand.style.scale = `${scale}`;
+
+      /* Length changes only the shaft above the center; its bottom stays anchored. */
+      const secondLengthPercent = 46 * secondHandLength;
+      const secondWidthPercent = 0.42 * secondHandWidth;
+      const secondTailWidthPercent = 0.34 * secondHandWidth;
+      const secondTailPercent = 8 * secondHandTail;
+      secondHand.style.setProperty("--second-hand-length", `${secondLengthPercent}%`);
+      secondHand.style.setProperty("--second-hand-width", `${secondWidthPercent}%`);
+      secondHand.style.setProperty("--second-hand-tail-width", `${secondTailWidthPercent}%`);
+      secondHand.style.setProperty("--second-hand-tail-length", `${secondTailPercent}%`);
+
+      handSizeValue.textContent = `${Math.round(scale * 100)}%`;
+      secondHandLengthValue.textContent = `${Math.round(secondHandLength * 100)}%`;
+      secondHandWidthValue.textContent = `${Math.round(secondHandWidth * 100)}%`;
+      secondHandTailValue.textContent = `${Math.round(secondHandTail * 100)}%`;
+    }
+
+    function updateClock() {
+      const now = new Date();
+      const milliseconds = now.getMilliseconds();
+      const seconds = now.getSeconds() + milliseconds / 1000;
+      const minutes = now.getMinutes() + seconds / 60;
+      const hours = (now.getHours() % 12) + minutes / 60;
+
+      hourHand.style.transform = `rotate(${hours * 30}deg)`;
+      minuteHand.style.transform = `rotate(${minutes * 6}deg)`;
+      secondHand.style.transform = `rotate(${seconds * 6}deg)`;
+
+      maybePlayHourlyChime(now);
+      requestAnimationFrame(updateClock);
+    }
+
+    function applyImageTransform() {
+      dialImage.style.transform =
+        `translate(calc(-50% + ${imageX}px), calc(-50% + ${imageY}px)) scale(${imageZoom})`;
+
+      zoomSlider.value = Math.round(imageZoom * 100);
+      xSlider.value = Math.round(imageX);
+      ySlider.value = Math.round(imageY);
+      zoomValue.textContent = `${Math.round(imageZoom * 100)}%`;
+      xValue.textContent = `${Math.round(imageX)}`;
+      yValue.textContent = `${Math.round(imageY)}`;
+    }
+
+    function resetImageTransform() {
+      imageZoom = 1;
+      imageX = 0;
+      imageY = 0;
+      imageFitMode = "contain";
+      dialImage.style.objectFit = imageFitMode;
+      applyImageTransform();
+    }
+
+    function stopAdjustment() {
+      isAdjusting = false;
+      isDragging = false;
+      clockFace.classList.remove("adjusting");
+      adjustButton.classList.remove("active");
+      adjustButton.textContent = "Start Drag Adjustment";
+    }
+
+    function showDefaultDial() {
+      if (uploadedImageUrl) {
+        URL.revokeObjectURL(uploadedImageUrl);
+        uploadedImageUrl = "";
+      }
+
+      stopAdjustment();
+      dialImage.removeAttribute("src");
+      dialImage.style.display = "none";
+      imagePicker.value = "";
+      builtInFaceSelect.value = "default";
+      currentImageKind = "default";
+      currentImagePath = "";
+      currentImageName = "";
+      currentImageBlob = null;
+      resetImageTransform();
+      imageStatus.textContent = "Using the default Roman dial.";
+    }
+
+    function loadBuiltInFace(path, label) {
+      if (uploadedImageUrl) {
+        URL.revokeObjectURL(uploadedImageUrl);
+        uploadedImageUrl = "";
+      }
+
+      stopAdjustment();
+      imagePicker.value = "";
+      currentImageKind = "built-in";
+      currentImagePath = path;
+      currentImageName = label;
+      currentImageBlob = null;
+      resetImageTransform();
+
+      dialImage.onload = () => {
+        dialImage.style.display = "block";
+        imageStatus.textContent = `Using built-in face: ${label}`;
+      };
+
+      dialImage.onerror = () => {
+        dialImage.style.display = "none";
+        imageStatus.textContent =
+          `Could not load ${label}. Check that the PNG file is inside the faces folder.`;
+      };
+
+      dialImage.src = path;
+    }
+
+    builtInFaceSelect.addEventListener("change", () => {
+      const selectedPath = builtInFaceSelect.value;
+      const selectedLabel =
+        builtInFaceSelect.options[builtInFaceSelect.selectedIndex].text;
+
+      if (selectedPath === "default") {
+        showDefaultDial();
+      } else {
+        loadBuiltInFace(selectedPath, selectedLabel);
+      }
+    });
+
+    imagePicker.addEventListener("change", () => {
+      const file = imagePicker.files && imagePicker.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        imageStatus.textContent = "Please choose a valid image file.";
+        return;
+      }
+
+      if (uploadedImageUrl) URL.revokeObjectURL(uploadedImageUrl);
+
+      builtInFaceSelect.value = "default";
+      currentImageKind = "uploaded";
+      currentImagePath = "";
+      currentImageName = file.name;
+      currentImageBlob = file;
+      uploadedImageUrl = URL.createObjectURL(file);
+      dialImage.onload = () => {
+        resetImageTransform();
+        dialImage.style.display = "block";
+        imageStatus.textContent = `Using: ${file.name}`;
+      };
+      dialImage.onerror = () => {
+        imageStatus.textContent = "The image could not be loaded.";
+      };
+      dialImage.src = uploadedImageUrl;
+    });
+
+    removeImageButton.addEventListener("click", showDefaultDial);
+
+    adjustButton.addEventListener("click", () => {
+      if (!uploadedImageUrl) {
+        imageStatus.textContent = "Upload a clock face image before adjusting it.";
+        return;
+      }
+
+      isAdjusting = !isAdjusting;
+      clockFace.classList.toggle("adjusting", isAdjusting);
+      adjustButton.classList.toggle("active", isAdjusting);
+      adjustButton.textContent = isAdjusting ? "Finish Drag Adjustment" : "Start Drag Adjustment";
+    });
+
+    zoomSlider.addEventListener("input", () => {
+      imageZoom = Number(zoomSlider.value) / 100;
+      applyImageTransform();
+    });
+
+    xSlider.addEventListener("input", () => {
+      imageX = Number(xSlider.value);
+      applyImageTransform();
+    });
+
+    ySlider.addEventListener("input", () => {
+      imageY = Number(ySlider.value);
+      applyImageTransform();
+    });
+
+    centerImageButton.addEventListener("click", () => {
+      imageX = 0;
+      imageY = 0;
+      applyImageTransform();
+    });
+
+    resetImageButton.addEventListener("click", resetImageTransform);
+
+    clockFace.addEventListener("pointerdown", event => {
+      if (!isAdjusting || !uploadedImageUrl) return;
+      isDragging = true;
+      dragStartX = event.clientX;
+      dragStartY = event.clientY;
+      dragOriginX = imageX;
+      dragOriginY = imageY;
+      clockFace.setPointerCapture(event.pointerId);
+    });
+
+    clockFace.addEventListener("pointermove", event => {
+      if (!isDragging || !isAdjusting) return;
+      imageX = Math.max(-300, Math.min(300, dragOriginX + event.clientX - dragStartX));
+      imageY = Math.max(-300, Math.min(300, dragOriginY + event.clientY - dragStartY));
+      applyImageTransform();
+    });
+
+    function endDrag(event) {
+      if (!isDragging) return;
+      isDragging = false;
+      if (clockFace.hasPointerCapture(event.pointerId)) {
+        clockFace.releasePointerCapture(event.pointerId);
+      }
+    }
+
+    clockFace.addEventListener("pointerup", endDrag);
+    clockFace.addEventListener("pointercancel", endDrag);
+
+    clockFace.addEventListener("wheel", event => {
+      if (!isAdjusting || !uploadedImageUrl) return;
+      event.preventDefault();
+      imageZoom = Math.max(0.4, Math.min(2.2, imageZoom + (event.deltaY < 0 ? 0.05 : -0.05)));
+      applyImageTransform();
+    }, { passive: false });
+
+    numberStyleSelect.addEventListener("change", () => {
+      numberStyle = numberStyleSelect.value;
+      renderDialNumbers();
+    });
+
+    numberFontSelect.addEventListener("change", applyDialNumberSettings);
+
+    numberSizeSlider.addEventListener("input", () => {
+      numberSize = Number(numberSizeSlider.value) / 100;
+      applyDialNumberSettings();
+    });
+
+    numberRadiusSlider.addEventListener("input", () => {
+      numberRadius = Number(numberRadiusSlider.value) / 100;
+      applyDialNumberSettings();
+    });
+
+    numberColor.addEventListener("input", applyDialNumberSettings);
+
+    resetNumbersButton.addEventListener("click", () => {
+      numberStyle = "none";
+      numberSize = 1;
+      numberRadius = 1;
+      numberStyleSelect.value = "none";
+      numberFontSelect.selectedIndex = 0;
+      numberSizeSlider.value = 100;
+      numberRadiusSlider.value = 100;
+      numberColor.value = "#21150d";
+      renderDialNumbers();
+    });
+
+    handStyleSelect.addEventListener("change", () => {
+      selectedHandStyle = handStyleSelect.value;
+      renderHands();
+    });
+
+    handSizeSlider.addEventListener("input", () => {
+      handScale = Number(handSizeSlider.value) / 100;
+      applyHandScale();
+    });
+
+    secondHandStyleSelect.addEventListener("change", () => {
+      secondHandStyle = secondHandStyleSelect.value;
+      renderHands();
+    });
+
+    secondHandLengthSlider.addEventListener("input", () => {
+      secondHandLength = Number(secondHandLengthSlider.value) / 100;
+      applyHandScale();
+    });
+
+    secondHandWidthSlider.addEventListener("input", () => {
+      secondHandWidth = Number(secondHandWidthSlider.value) / 100;
+      applyHandScale();
+    });
+
+    secondHandTailSlider.addEventListener("input", () => {
+      secondHandTail = Number(secondHandTailSlider.value) / 100;
+      applyHandScale();
+    });
+
+    secondHandToggle.addEventListener("change", () => {
+      secondHand.style.display = secondHandToggle.checked ? "block" : "none";
+    });
+
+    handColor.addEventListener("input", () => {
+      document.documentElement.style.setProperty("--hand-color", handColor.value);
+      document.documentElement.style.setProperty("--hand-highlight", handColor.value);
+    });
+
+    centerColor.addEventListener("input", () => {
+      document.documentElement.style.setProperty("--center-color", centerColor.value);
+    });
+
+    secondColor.addEventListener("input", () => {
+      document.documentElement.style.setProperty("--second-color", secondColor.value);
+    });
+
+    resetHandsButton.addEventListener("click", () => {
+      selectedHandStyle = "classic-spade";
+      handStyleSelect.value = selectedHandStyle;
+      handScale = 1;
+      secondHandStyle = "classic";
+      secondHandLength = 1;
+      secondHandWidth = 1;
+      secondHandTail = 1;
+      handSizeSlider.value = 100;
+      secondHandStyleSelect.value = "classic";
+      secondHandLengthSlider.value = 100;
+      secondHandWidthSlider.value = 100;
+      secondHandTailSlider.value = 100;
+      handColor.value = "#171411";
+      centerColor.value = "#b98a42";
+      secondColor.value = "#8d211d";
+      document.documentElement.style.setProperty("--hand-color", handColor.value);
+      document.documentElement.style.setProperty("--hand-highlight", "#4f4337");
+      document.documentElement.style.setProperty("--center-color", centerColor.value);
+      document.documentElement.style.setProperty("--second-color", secondColor.value);
+      renderHands();
+    });
+
+    brandToggle.addEventListener("change", () => {
+      brand.style.display = brandToggle.checked ? "block" : "none";
+    });
+
+    hideControlsButton.addEventListener("click", () => {
+      stopAdjustment();
+      document.body.classList.add("controls-hidden");
+    });
+
+    showControlsButton.addEventListener("click", () => {
+      document.body.classList.remove("controls-hidden");
+    });
+
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+    let deferredInstallPrompt = null;
+
+    function setIOSGuide() {
+      appGuideIntro.textContent = "On iPhone or iPad, add this clock to your Home Screen to hide Safari's tabs and address bar.";
+      appGuideSteps.innerHTML = `
+        <li>Open this page in <strong>Safari</strong>.</li>
+        <li>Tap the <strong>Share</strong> button.</li>
+        <li>Choose <strong>Add to Home Screen</strong>.</li>
+        <li>Turn on <strong>Open as Web App</strong>, then tap <strong>Add</strong>.</li>
+        <li>Open Vintage Clock from its new Home Screen icon.</li>`;
+      appGuideNote.textContent = "Your clock will open in its own app-style window. The iPhone status bar may still remain visible.";
+    }
+
+    function setAndroidGuide() {
+      appGuideIntro.textContent = "Install Vintage Clock from Chrome to open it without browser tabs or an address bar.";
+      appGuideSteps.innerHTML = `
+        <li>Open this page in <strong>Chrome</strong>.</li>
+        <li>Tap Chrome's <strong>menu (⋮)</strong>.</li>
+        <li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>
+        <li>Confirm the installation.</li>
+        <li>Open Vintage Clock from its new app icon.</li>`;
+      appGuideNote.textContent = "Once installed, Vintage Clock opens in its own app-style window and can use its offline cache.";
+    }
+
+    function openAppGuide() {
+      if (isAndroid) setAndroidGuide();
+      else setIOSGuide();
+      appGuideOverlay.classList.add("open");
+    }
+
+    function closeAppGuide() {
+      appGuideOverlay.classList.remove("open");
+    }
+
+    function hideInstallButtonWhenInstalled() {
+      fullscreenButton.hidden = true;
+      appModeHint.hidden = true;
+    }
+
+    closeAppGuideButton.addEventListener("click", closeAppGuide);
+    appGuideOverlay.addEventListener("click", (event) => {
+      if (event.target === appGuideOverlay) closeAppGuide();
+    });
+
+    if (isStandalone) {
+      hideInstallButtonWhenInstalled();
+    } else if (isIOS) {
+      fullscreenButton.textContent = "Use as Full-Screen App";
+      appModeHint.textContent = "Add to Home Screen for an app-style display on iPhone or iPad.";
+    } else if (isAndroid) {
+      fullscreenButton.textContent = "Install Vintage Clock";
+      appModeHint.textContent = "Install from Chrome for an app-style, full-screen display.";
+    }
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      if (!isStandalone) {
+        fullscreenButton.hidden = false;
+        if (isAndroid) fullscreenButton.textContent = "Install Vintage Clock";
+      }
+    });
+
+    window.addEventListener("appinstalled", () => {
+      deferredInstallPrompt = null;
+      hideInstallButtonWhenInstalled();
+    });
+
+    fullscreenButton.addEventListener("click", async () => {
+      if (isIOS) {
+        openAppGuide();
+        return;
+      }
+
+      if (isAndroid) {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const choice = await deferredInstallPrompt.userChoice;
+          deferredInstallPrompt = null;
+          if (choice.outcome === "accepted") {
+            appModeHint.textContent = "Installation started.";
+          } else {
+            appModeHint.textContent = "Installation was cancelled. You can try again from Chrome's menu.";
+          }
+        } else {
+          openAppGuide();
+        }
+        return;
+      }
+
+      if (!document.documentElement.requestFullscreen) {
+        openAppGuide();
+        return;
+      }
+
+      try {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+        } else {
+          await document.exitFullscreen();
+        }
+      } catch (error) {
+        console.error(error);
+        openAppGuide();
+      }
+    });
+
+    document.addEventListener("fullscreenchange", () => {
+      if (!isIOS && !isAndroid && !isStandalone) {
+        fullscreenButton.textContent = document.fullscreenElement ? "Exit Fullscreen" : "Enter Fullscreen";
+      }
+    });
+
+   if ("serviceWorker" in navigator && location.protocol !== "file:") {
   window.addEventListener("load", async () => {
     try {
-      const registration=await navigator.serviceWorker.register("service-worker.js",{updateViaCache:"none"});
-      if(registration.waiting)showUpdate(registration.waiting);
-      registration.addEventListener("updatefound",()=>{
-        const worker=registration.installing;
-        worker?.addEventListener("statechange",()=>{
-          if(worker.state==="installed"&&navigator.serviceWorker.controller)showUpdate(worker);
-        });
-      });
-      setInterval(()=>registration.update(),60*60*1000);
-    } catch(e) {}
+      const registration = await navigator.serviceWorker.register(
+        "./service-worker.js",
+        {
+          updateViaCache: "none"
+        }
+      );
+
+      await registration.update();
+    } catch (error) {
+      console.warn("Offline support could not be enabled:", error);
+    }
   });
-  navigator.serviceWorker.addEventListener("controllerchange",()=>window.location.reload());
-  document.getElementById("updateNowBtn")?.addEventListener("click",()=>waitingWorker?.postMessage({type:"SKIP_WAITING"}));
 }
-</script>
+
+    function openClockDatabase() {
+      return new Promise((resolve, reject) => {
+        if (!("indexedDB" in window)) {
+          reject(new Error("IndexedDB is not available in this browser."));
+          return;
+        }
+        const request = indexedDB.open(CLOCK_DB_NAME, CLOCK_DB_VERSION);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains(CLOCK_MEDIA_STORE)) {
+            db.createObjectStore(CLOCK_MEDIA_STORE);
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error("Could not open local storage."));
+      });
+    }
+
+    async function putClockMedia(key, blob) {
+      const db = await openClockDatabase();
+      try {
+        await new Promise((resolve, reject) => {
+          const transaction = db.transaction(CLOCK_MEDIA_STORE, "readwrite");
+          transaction.objectStore(CLOCK_MEDIA_STORE).put(blob, key);
+          transaction.oncomplete = () => resolve();
+          transaction.onerror = () => reject(transaction.error);
+          transaction.onabort = () => reject(transaction.error || new Error("Storage was interrupted."));
+        });
+      } finally {
+        db.close();
+      }
+    }
+
+    async function getClockMedia(key) {
+      const db = await openClockDatabase();
+      try {
+        return await new Promise((resolve, reject) => {
+          const transaction = db.transaction(CLOCK_MEDIA_STORE, "readonly");
+          const request = transaction.objectStore(CLOCK_MEDIA_STORE).get(key);
+          request.onsuccess = () => resolve(request.result || null);
+          request.onerror = () => reject(request.error);
+        });
+      } finally {
+        db.close();
+      }
+    }
+
+    async function deleteClockMedia(key) {
+      const db = await openClockDatabase();
+      try {
+        await new Promise((resolve, reject) => {
+          const transaction = db.transaction(CLOCK_MEDIA_STORE, "readwrite");
+          transaction.objectStore(CLOCK_MEDIA_STORE).delete(key);
+          transaction.oncomplete = () => resolve();
+          transaction.onerror = () => reject(transaction.error);
+        });
+      } finally {
+        db.close();
+      }
+    }
+
+    function collectClockSettings() {
+      return {
+        version: 1,
+        savedAt: new Date().toISOString(),
+        image: {
+          kind: currentImageKind,
+          path: currentImagePath,
+          name: currentImageName,
+          zoom: imageZoom,
+          x: imageX,
+          y: imageY,
+          fit: imageFitMode
+        },
+        numbers: {
+          style: numberStyle,
+          font: numberFontSelect.value,
+          size: numberSize,
+          radius: numberRadius,
+          color: numberColor.value
+        },
+        hands: {
+          style: selectedHandStyle,
+          scale: handScale,
+          secondStyle: secondHandStyle,
+          secondLength: secondHandLength,
+          secondWidth: secondHandWidth,
+          secondTail: secondHandTail,
+          showSecond: secondHandToggle.checked,
+          handColor: handColor.value,
+          centerColor: centerColor.value,
+          secondColor: secondColor.value
+        },
+        display: {
+          showBrand: brandToggle.checked
+        },
+        chime: {
+          enabled: chimeToggle.checked,
+          sound: chimeSoundSelect.value,
+          repeat: repeatCountSelect.value,
+          spacing: strikeSpacingSlider.value,
+          tail: soundTailSlider.value,
+          quietEnabled: quietToggle.checked,
+          quietStart: quietStart.value,
+          quietEnd: quietEnd.value,
+          customName: customChimeName
+        }
+      };
+    }
+
+    async function saveCompleteClock(showConfirmation = false) {
+      if (isRestoringClock) return;
+      try {
+        const settings = collectClockSettings();
+        localStorage.setItem(CLOCK_SETTINGS_KEY, JSON.stringify(settings));
+
+        if (currentImageKind === "uploaded" && currentImageBlob) {
+          await putClockMedia("dialImage", currentImageBlob);
+        } else {
+          await deleteClockMedia("dialImage").catch(() => {});
+        }
+
+        if (chimeSoundSelect.value === "custom" && currentChimeBlob) {
+          await putClockMedia("customChime", currentChimeBlob);
+        } else if (chimeSoundSelect.value !== "custom") {
+          await deleteClockMedia("customChime").catch(() => {});
+        }
+
+        saveClockStatus.textContent = showConfirmation
+          ? "Your clock has been saved on this device. ✓"
+          : "All changes saved automatically. ✓";
+      } catch (error) {
+        console.error("Could not save the clock.", error);
+        saveClockStatus.textContent = "This browser could not save all clock data. Please check available storage.";
+      }
+    }
+
+    function scheduleClockSave() {
+      if (isRestoringClock) return;
+      clearTimeout(autoSaveTimer);
+      saveClockStatus.textContent = "Saving changes…";
+      autoSaveTimer = setTimeout(() => saveCompleteClock(false), 450);
+    }
+
+    function applyRestoredClockSettings(saved) {
+      const numbers = saved.numbers || {};
+      numberStyle = numbers.style || "none";
+      numberStyleSelect.value = numberStyle;
+      if (numbers.font && [...numberFontSelect.options].some(option => option.value === numbers.font)) {
+        numberFontSelect.value = numbers.font;
+      }
+      numberSize = Number(numbers.size) || 1;
+      numberRadius = Number(numbers.radius) || 1;
+      numberSizeSlider.value = Math.round(numberSize * 100);
+      numberRadiusSlider.value = Math.round(numberRadius * 100);
+      if (numbers.color) numberColor.value = numbers.color;
+      renderDialNumbers();
+
+      const hands = saved.hands || {};
+      selectedHandStyle = handStyles[hands.style] ? hands.style : "classic-spade";
+      handStyleSelect.value = selectedHandStyle;
+      handScale = Number(hands.scale) || 1;
+      secondHandStyle = hands.secondStyle || "classic";
+      secondHandLength = Number(hands.secondLength) || 1;
+      secondHandWidth = Number(hands.secondWidth) || 1;
+      secondHandTail = Number.isFinite(Number(hands.secondTail)) ? Number(hands.secondTail) : 1;
+      handSizeSlider.value = Math.round(handScale * 100);
+      secondHandStyleSelect.value = secondHandStyle;
+      secondHandLengthSlider.value = Math.round(secondHandLength * 100);
+      secondHandWidthSlider.value = Math.round(secondHandWidth * 100);
+      secondHandTailSlider.value = Math.round(secondHandTail * 100);
+      secondHandToggle.checked = hands.showSecond !== false;
+      handColor.value = hands.handColor || "#171411";
+      centerColor.value = hands.centerColor || "#b98a42";
+      secondColor.value = hands.secondColor || "#8d211d";
+      document.documentElement.style.setProperty("--hand-color", handColor.value);
+      document.documentElement.style.setProperty("--hand-highlight", handColor.value);
+      document.documentElement.style.setProperty("--center-color", centerColor.value);
+      document.documentElement.style.setProperty("--second-color", secondColor.value);
+      renderHands();
+      secondHand.style.display = secondHandToggle.checked ? "block" : "none";
+
+      brandToggle.checked = !saved.display || saved.display.showBrand !== false;
+      brand.style.display = brandToggle.checked ? "block" : "none";
+
+      const chime = saved.chime || {};
+      chimeToggle.checked = Boolean(chime.enabled);
+      if (chime.repeat) repeatCountSelect.value = chime.repeat;
+      if (chime.spacing) strikeSpacingSlider.value = chime.spacing;
+      if (chime.tail) soundTailSlider.value = chime.tail;
+      if (typeof chime.quietEnabled === "boolean") quietToggle.checked = chime.quietEnabled;
+      if (chime.quietStart) quietStart.value = chime.quietStart;
+      if (chime.quietEnd) quietEnd.value = chime.quietEnd;
+      updateChimeLabels();
+      audioStatus.textContent = chimeToggle.checked ? "Hourly chime is enabled." : "Sound is off.";
+    }
+
+    async function restoreSavedClock() {
+      const raw = localStorage.getItem(CLOCK_SETTINGS_KEY);
+      if (!raw) {
+        saveClockStatus.textContent = "Changes are saved automatically on this device.";
+        return false;
+      }
+
+      isRestoringClock = true;
+      try {
+        const saved = JSON.parse(raw);
+        applyRestoredClockSettings(saved);
+
+        const image = saved.image || {};
+        if (image.kind === "uploaded") {
+          const blob = await getClockMedia("dialImage");
+          if (blob) {
+            if (uploadedImageUrl) URL.revokeObjectURL(uploadedImageUrl);
+            currentImageBlob = blob;
+            currentImageKind = "uploaded";
+            currentImageName = image.name || "Saved clock face";
+            uploadedImageUrl = URL.createObjectURL(blob);
+            builtInFaceSelect.value = "default";
+            dialImage.src = uploadedImageUrl;
+            dialImage.style.display = "block";
+            imageStatus.textContent = `Restored: ${currentImageName}`;
+          } else {
+            showDefaultDial();
+          }
+        } else if (image.kind === "built-in" && image.path) {
+          loadBuiltInFace(image.path, image.name || "Saved face");
+          builtInFaceSelect.value = image.path;
+        } else {
+          showDefaultDial();
+        }
+
+        imageZoom = Number(image.zoom) || 1;
+        imageX = Number(image.x) || 0;
+        imageY = Number(image.y) || 0;
+        imageFitMode = image.fit || "contain";
+        dialImage.style.objectFit = imageFitMode;
+        applyImageTransform();
+
+        const chime = saved.chime || {};
+        if (chime.sound === "custom") {
+          const blob = await getClockMedia("customChime");
+          if (blob) {
+            if (customChimeUrl) URL.revokeObjectURL(customChimeUrl);
+            currentChimeBlob = blob;
+            customChimeName = chime.customName || "Saved custom chime";
+            customChimeUrl = URL.createObjectURL(blob);
+            customChimeOption.disabled = false;
+            customChimeOption.textContent = `Custom: ${customChimeName}`;
+            chimeSoundSelect.value = "custom";
+          }
+        } else if (chime.sound && [...chimeSoundSelect.options].some(option => option.value === chime.sound)) {
+          chimeSoundSelect.value = chime.sound;
+        }
+        updateChimeLabels();
+        saveClockStatus.textContent = "Your saved clock was restored automatically. ✓";
+        return true;
+      } catch (error) {
+        console.error("Could not restore the saved clock.", error);
+        saveClockStatus.textContent = "The saved clock could not be restored.";
+        return false;
+      } finally {
+        isRestoringClock = false;
+      }
+    }
+
+    async function resetClockToDefault() {
+      const confirmed = window.confirm("Reset the clock and remove the locally saved image, sound, and settings from this device?");
+      if (!confirmed) return;
+      clearTimeout(autoSaveTimer);
+      stopAllChimes();
+      localStorage.removeItem(CLOCK_SETTINGS_KEY);
+      localStorage.removeItem("vintageClockChimeSettings");
+      await Promise.all([
+        deleteClockMedia("dialImage").catch(() => {}),
+        deleteClockMedia("customChime").catch(() => {})
+      ]);
+      location.reload();
+    }
+
+    function saveChimeSettings() {
+      const settings = {
+        enabled: chimeToggle.checked,
+        sound: chimeSoundSelect.value === "custom" ? "" : chimeSoundSelect.value,
+        repeat: repeatCountSelect.value,
+        spacing: strikeSpacingSlider.value,
+        tail: soundTailSlider.value,
+        quietEnabled: quietToggle.checked,
+        quietStart: quietStart.value,
+        quietEnd: quietEnd.value
+      };
+      localStorage.setItem("vintageClockChimeSettings", JSON.stringify(settings));
+    }
+
+    function loadChimeSettings() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("vintageClockChimeSettings") || "null");
+        if (!saved) return;
+        chimeToggle.checked = Boolean(saved.enabled);
+        if (saved.sound && [...chimeSoundSelect.options].some(option => option.value === saved.sound)) {
+          chimeSoundSelect.value = saved.sound;
+        }
+        if (saved.repeat) repeatCountSelect.value = saved.repeat;
+        if (saved.spacing) strikeSpacingSlider.value = saved.spacing;
+        if (saved.tail) {
+          // Migrate the former 15-second default to the new 30-second default.
+          soundTailSlider.value = Number(saved.tail) === 15 ? 30 : saved.tail;
+        }
+        if (typeof saved.quietEnabled === "boolean") quietToggle.checked = saved.quietEnabled;
+        if (saved.quietStart) quietStart.value = saved.quietStart;
+        if (saved.quietEnd) quietEnd.value = saved.quietEnd;
+      } catch (error) {
+        console.warn("Could not load saved chime settings.", error);
+      }
+    }
+
+    function updateChimeLabels() {
+      strikeSpacingValue.textContent = `${Number(strikeSpacingSlider.value).toFixed(1)} sec`;
+      soundTailValue.textContent = `${Number(soundTailSlider.value).toFixed(1)} sec`;
+      const isWestminster = chimeSoundSelect.value.includes("westminster");
+      westminsterRecommendation.style.display = isWestminster ? "block" : "none";
+    }
+
+    function getSelectedChimeSource() {
+      if (chimeSoundSelect.value === "custom") {
+        if (!customChimeUrl) throw new Error("Upload a custom chime first.");
+        return customChimeUrl;
+      }
+      return chimeSoundSelect.value;
+    }
+
+    function getRepeatCount(hour = new Date().getHours()) {
+      return repeatCountSelect.value === "hour"
+        ? (hour % 12 || 12)
+        : Number(repeatCountSelect.value);
+    }
+
+    function stopAllChimes() {
+      chimeTimers.forEach(timer => clearTimeout(timer));
+      chimeTimers.clear();
+
+      activeChimeAudios.forEach(audio => {
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+        } catch (error) {
+          console.warn(error);
+        }
+      });
+      activeChimeAudios.clear();
+      audioStatus.textContent = chimeToggle.checked ? "Hourly chime is enabled." : "Sound is off.";
+    }
+
+    function fadeAndStopAudio(audio, tailSeconds) {
+      const fadeDuration = Math.min(0.25, Math.max(0.08, tailSeconds * 0.12));
+      const fadeStartMs = Math.max(0, (tailSeconds - fadeDuration) * 1000);
+      const fadeTimer = setTimeout(() => {
+        const steps = 8;
+        let step = 0;
+        const initialVolume = audio.volume;
+        const interval = setInterval(() => {
+          step += 1;
+          audio.volume = Math.max(0, initialVolume * (1 - step / steps));
+          if (step >= steps) {
+            clearInterval(interval);
+            audio.pause();
+            activeChimeAudios.delete(audio);
+          }
+        }, (fadeDuration * 1000) / steps);
+      }, fadeStartMs);
+      chimeTimers.add(fadeTimer);
+    }
+
+    function playOneChime(source, delayMs, tailSeconds) {
+      const timer = setTimeout(async () => {
+        chimeTimers.delete(timer);
+        const audio = new Audio(source);
+        audio.preload = "auto";
+        activeChimeAudios.add(audio);
+
+        const cleanUp = () => activeChimeAudios.delete(audio);
+        audio.addEventListener("ended", cleanUp, { once: true });
+        audio.addEventListener("error", () => {
+          cleanUp();
+          audioStatus.textContent = "The selected chime could not be played.";
+        }, { once: true });
+
+        try {
+          await audio.play();
+          fadeAndStopAudio(audio, tailSeconds);
+        } catch (error) {
+          cleanUp();
+          console.error(error);
+          audioStatus.textContent = "Tap Preview once to allow sound in this browser.";
+        }
+      }, delayMs);
+      chimeTimers.add(timer);
+    }
+
+    function playSelectedChime(hour = new Date().getHours()) {
+      stopAllChimes();
+      const source = getSelectedChimeSource();
+      const repeatCount = getRepeatCount(hour);
+      const spacingMs = Number(strikeSpacingSlider.value) * 1000;
+      const tailSeconds = Number(soundTailSlider.value);
+
+      for (let i = 0; i < repeatCount; i += 1) {
+        playOneChime(source, i * spacingMs, tailSeconds);
+      }
+
+      const soundName = chimeSoundSelect.options[chimeSoundSelect.selectedIndex].text;
+      audioStatus.textContent = `Playing ${soundName} × ${repeatCount}.`;
+    }
+
+    function timeToMinutes(value) {
+      const [hours, minutes] = value.split(":").map(Number);
+      return hours * 60 + minutes;
+    }
+
+    function isQuietTime(date) {
+      if (!quietToggle.checked) return false;
+      const current = date.getHours() * 60 + date.getMinutes();
+      const start = timeToMinutes(quietStart.value);
+      const end = timeToMinutes(quietEnd.value);
+      if (start === end) return false;
+      return start < end ? current >= start && current < end : current >= start || current < end;
+    }
+
+    function maybePlayHourlyChime(now) {
+      if (!chimeToggle.checked || isQuietTime(now)) return;
+      if (now.getMinutes() !== 0 || now.getSeconds() !== 0) return;
+
+      const hourKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${now.getHours()}`;
+      if (hourKey === lastChimedHourKey) return;
+
+      lastChimedHourKey = hourKey;
+      try {
+        playSelectedChime(now.getHours());
+      } catch (error) {
+        console.error(error);
+        audioStatus.textContent = error.message;
+      }
+    }
+
+    chimeSoundSelect.addEventListener("change", () => {
+      updateChimeLabels();
+      saveChimeSettings();
+    });
+
+    chimeToggle.addEventListener("change", () => {
+      audioStatus.textContent = chimeToggle.checked ? "Hourly chime is enabled." : "Sound is off.";
+      saveChimeSettings();
+    });
+
+    [chimeSoundSelect, repeatCountSelect, quietToggle, quietStart, quietEnd].forEach(control => {
+      control.addEventListener("change", saveChimeSettings);
+    });
+
+    strikeSpacingSlider.addEventListener("input", () => {
+      updateChimeLabels();
+      saveChimeSettings();
+    });
+
+    soundTailSlider.addEventListener("input", () => {
+      updateChimeLabels();
+      saveChimeSettings();
+    });
+
+    customChimePicker.addEventListener("change", () => {
+      const file = customChimePicker.files && customChimePicker.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("audio/") && !/\.(mp3|wav|m4a|aac|ogg)$/i.test(file.name)) {
+        customChimePicker.value = "";
+        audioStatus.textContent = "Please choose a valid audio file.";
+        return;
+      }
+
+      const temporaryUrl = URL.createObjectURL(file);
+      const probe = new Audio();
+      probe.preload = "metadata";
+      probe.src = temporaryUrl;
+
+      probe.addEventListener("loadedmetadata", () => {
+        if (!Number.isFinite(probe.duration) || probe.duration > 15.05) {
+          URL.revokeObjectURL(temporaryUrl);
+          customChimePicker.value = "";
+          audioStatus.textContent = "Custom chimes must be 15 seconds or shorter.";
+          return;
+        }
+
+        if (customChimeUrl) URL.revokeObjectURL(customChimeUrl);
+        customChimeUrl = temporaryUrl;
+        customChimeName = file.name;
+        currentChimeBlob = file;
+        customChimeOption.disabled = false;
+        customChimeOption.textContent = `Custom: ${file.name}`;
+        chimeSoundSelect.value = "custom";
+        audioStatus.textContent = `Loaded ${file.name} (${probe.duration.toFixed(1)} sec).`;
+      }, { once: true });
+
+      probe.addEventListener("error", () => {
+        URL.revokeObjectURL(temporaryUrl);
+        customChimePicker.value = "";
+        audioStatus.textContent = "The selected audio file could not be read.";
+      }, { once: true });
+    });
+
+    testChimeButton.addEventListener("click", () => {
+      try {
+        playSelectedChime(new Date().getHours());
+      } catch (error) {
+        console.error(error);
+        audioStatus.textContent = error.message;
+      }
+    });
+
+    stopChimeButton.addEventListener("click", stopAllChimes);
+
+    saveClockButton.addEventListener("click", () => saveCompleteClock(true));
+    resetDefaultButton.addEventListener("click", resetClockToDefault);
+
+    document.querySelectorAll(".panel input, .panel select").forEach(control => {
+      control.addEventListener("input", scheduleClockSave);
+      control.addEventListener("change", scheduleClockSave);
+    });
+    document.querySelectorAll(".panel button").forEach(button => {
+      if (button !== saveClockButton && button !== resetDefaultButton &&
+          button !== testChimeButton && button !== stopChimeButton &&
+          button !== fullscreenButton && button !== hideControlsButton) {
+        button.addEventListener("click", scheduleClockSave);
+      }
+    });
+    clockFace.addEventListener("pointerup", scheduleClockSave);
+    clockFace.addEventListener("pointercancel", scheduleClockSave);
+    clockFace.addEventListener("wheel", scheduleClockSave, { passive: true });
+
+    loadChimeSettings();
+    updateChimeLabels();
+    audioStatus.textContent = chimeToggle.checked ? "Hourly chime is enabled." : "Sound is off.";
+
+    window.addEventListener("beforeunload", () => {
+      stopAllChimes();
+      if (uploadedImageUrl) URL.revokeObjectURL(uploadedImageUrl);
+      if (customChimeUrl) URL.revokeObjectURL(customChimeUrl);
+    });
+
+    renderDialNumbers();
+    renderHands();
+    renderHandPreviews();
+    applyImageTransform();
+    restoreSavedClock();
+    updateClock();
+  </script>
 </body>
 </html>
